@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ch-ivory: #f7f3ec;
+  --ch-forest: #1e3a2b;
+  --ch-brass: #b08d3e;
+  --ch-ink: #1f1d18;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--ch-ivory);
+  color: var(--ch-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* ---------- Liquid Glass surfaces ---------- */
+.glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 8px 24px rgba(31, 29, 24, 0.08);
+}
+
+.glass-forest {
+  background: rgba(30, 58, 43, 0.72);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 24px rgba(20, 42, 31, 0.28);
+}
+
+.glass-brass {
+  background: rgba(244, 236, 218, 0.6);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(176, 141, 62, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 6px 18px rgba(138, 110, 47, 0.12);
+}
+
+/* ---------- Buttons ---------- */
+.btn-glass {
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-glass:active {
+  transform: scale(0.97);
+}
+
+.btn-primary-glass {
+  background: rgba(30, 58, 43, 0.85);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 6px 18px rgba(20, 42, 31, 0.3);
+  color: #f7f3ec;
+}
+
+/* ---------- Cards ---------- */
+.card-lux {
+  background: #fbf9f4;
+  border: 1px solid rgba(31, 29, 24, 0.08);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgba(31, 29, 24, 0.05),
+    0 8px 24px rgba(31, 29, 24, 0.08);
+}
+
+/* ---------- Brass divider ---------- */
+.rule-brass {
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #b08d3e 20%,
+    #b08d3e 80%,
+    transparent
+  );
+  border: 0;
+}
+
+/* ---------- Bottom tab bar safe area ---------- */
+.tabbar-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ---------- Readiness meter ---------- */
+.meter-track {
+  background: #efe8d8;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.meter-fill {
+  background: linear-gradient(to right, #2c4f3a, #1e3a2b);
+  border-radius: 9999px;
+  transition: width 0.6s ease;
+}
+
+/* ---------- Status pills ---------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.pill-active {
+  background: #e9efe9;
+  color: #1e3a2b;
+}
+
+.pill-warn {
+  background: #f4ecda;
+  color: #8a6e2f;
+}
+
+.pill-bad {
+  background: #f6e3df;
+  color: #8c3b2e;
+}
+
+.pill-muted {
+  background: #efe8d8;
+  color: #4a463c;
+}
