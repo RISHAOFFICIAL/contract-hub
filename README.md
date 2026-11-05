@@ -81,6 +81,7 @@ src/
     app/
       layout.tsx             Session check, renders AppShell
       page.tsx               Dashboard (real data, empty states)
+      plan/page.tsx          Plan screen (Free now, Pro coming later)
     api/cron/daily-scan/     Daily scan cron stub (CRON_SECRET guarded)
   components/
     AppShell.tsx             Authenticated shell, More sheet state
@@ -132,7 +133,11 @@ Foundation is done. These ship in later phases:
 - Ads section (browse plus advertiser packages)
 - Team management screens
 - Capability statement generator
-- Billing (Pro $24/mo) with Stripe
+- Billing and subscriptions (deferred). Contract Hub is free for now and
+  every business defaults to full access on the `free` plan. The `plan`
+  column exists on `businesses` for the future Pro tier, and a Stripe
+  product for Contract Hub Pro already exists, but nothing is wired to
+  Stripe in v1. No checkout, no paywall.
 - Email and push notifications
 - Document vault with real file storage (currently checklist only)
 - Native iOS and Android packaging

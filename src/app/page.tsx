@@ -121,15 +121,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing teaser */}
+      {/* Pricing */}
       <section className="mx-auto max-w-3xl px-6 pb-16 text-center">
         <h2 className="font-display text-2xl font-semibold text-forest">
-          Free to start, Pro when you are ready
+          Free for now
         </h2>
         <p className="mt-3 text-ink-soft">
-          The free plan covers your profile, manual tracking, and the document
-          checklist. Pro adds daily opportunity scans, deadline alerts, the
-          proposal workbench, and the margin calculator for $24 per month.
+          Contract Hub is free while it is being built with early owners.
+          Every feature is unlocked and there is no credit card required. A
+          Pro tier is coming later.
         </p>
         <Link
           href="/signup"

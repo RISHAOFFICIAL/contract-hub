@@ -42,9 +42,26 @@ CREATE TABLE IF NOT EXISTS public.businesses (
   product_lines text[] NOT NULL DEFAULT '{}',
   service_lines text[] NOT NULL DEFAULT '{}',
   certifications_summary text,
+  -- Plan tier. v1: the app is free and every business gets full access.
+  -- 'pro' is reserved for the paid tier coming later. No Stripe in v1.
+  plan text NOT NULL DEFAULT 'free',
   created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT businesses_plan_check CHECK (plan IN ('free', 'pro'))
 );
+
+-- Migration safety for databases created before the plan column existed
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS plan text NOT NULL DEFAULT 'free';
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'businesses_plan_check'
+  ) THEN
+    ALTER TABLE public.businesses
+      ADD CONSTRAINT businesses_plan_check CHECK (plan IN ('free', 'pro'));
+  END IF;
+END
+$$;
 
 DROP TRIGGER IF EXISTS businesses_set_updated_at ON public.businesses;
 CREATE TRIGGER businesses_set_updated_at

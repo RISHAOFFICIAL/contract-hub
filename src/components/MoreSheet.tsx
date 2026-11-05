@@ -1,6 +1,10 @@
 "use client";
 
-const SECTIONS = [
+import Link from "next/link";
+
+type Section = { name: string; detail: string; href?: string };
+
+const SECTIONS: Section[] = [
   { name: "Registrations", detail: "SAM.gov, state, county, and city portals" },
   { name: "Certifications", detail: "WOSB, HUBZone, DBE, MBE, and local programs" },
   { name: "Vault", detail: "Document checklist for bids and filings" },
@@ -11,7 +15,7 @@ const SECTIONS = [
   { name: "Alerts", detail: "New matches, deadlines, renewals" },
   { name: "Rewards", detail: "Your Bid Ready Journey badges" },
   { name: "Team", detail: "Invite owners, admins, members, viewers" },
-  { name: "Plan", detail: "Free and Pro subscription" },
+  { name: "Plan", detail: "Your current plan", href: "/app/plan" },
   { name: "Ads", detail: "Promote your business in the Hub" },
   { name: "Profile", detail: "Business details, NAICS, service area" },
   { name: "Security", detail: "Sign in, sessions, and data controls" },
@@ -49,18 +53,34 @@ export default function MoreSheet({
           </button>
         </div>
         <ul className="mt-4 space-y-2">
-          {SECTIONS.map((s) => (
-            <li
-              key={s.name}
-              className="card-lux flex items-center justify-between px-5 py-4"
-            >
-              <div>
-                <p className="font-semibold text-ink">{s.name}</p>
-                <p className="text-sm text-ink-faint">{s.detail}</p>
-              </div>
-              <span className="pill pill-muted">Soon</span>
-            </li>
-          ))}
+          {SECTIONS.map((s) =>
+            s.href ? (
+              <li key={s.name}>
+                <Link
+                  href={s.href}
+                  onClick={onClose}
+                  className="card-lux flex w-full items-center justify-between px-5 py-4"
+                >
+                  <div>
+                    <p className="font-semibold text-ink">{s.name}</p>
+                    <p className="text-sm text-ink-faint">{s.detail}</p>
+                  </div>
+                  <span className="pill pill-active">Open</span>
+                </Link>
+              </li>
+            ) : (
+              <li
+                key={s.name}
+                className="card-lux flex items-center justify-between px-5 py-4"
+              >
+                <div>
+                  <p className="font-semibold text-ink">{s.name}</p>
+                  <p className="text-sm text-ink-faint">{s.detail}</p>
+                </div>
+                <span className="pill pill-muted">Soon</span>
+              </li>
+            )
+          )}
         </ul>
       </div>
     </div>
