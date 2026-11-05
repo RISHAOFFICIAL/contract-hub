@@ -12,6 +12,7 @@ import { DeleteButton } from "@/components/ui-client";
 import { deleteContract } from "../actions";
 import { StageMoveButtons } from "../contract-card";
 import { stageLabel, stagePillClass, type ContractRow } from "../stages";
+import TalkToUpdate from "./talk-to-update";
 
 function DetailRow({
   label,
@@ -171,6 +172,20 @@ export default async function ContractDetailPage({
           >
             Open workbench
           </Link>
+        </div>
+      </section>
+
+      {/* Talk to update */}
+      <section className="glass rounded-3xl p-6">
+        <h2 className="font-display text-lg font-semibold text-forest">
+          Talk to update
+        </h2>
+        <p className="mt-1 text-sm text-ink-faint">
+          Speak or type what changed and review the plan before anything is
+          applied.
+        </p>
+        <div className="mt-4">
+          <TalkToUpdate contractId={contract.id} />
         </div>
       </section>
 

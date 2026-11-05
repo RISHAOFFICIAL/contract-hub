@@ -13,10 +13,10 @@ const SECTIONS: Section[] = [
   { name: "Capability Statement", detail: "Generate a print ready one pager", href: "/app/capability" },
   { name: "Saved Searches", detail: "Your daily scan recipes", href: "/app/saved-searches" },
   { name: "Alerts", detail: "New matches, deadlines, renewals", href: "/app/alerts" },
-  { name: "Rewards", detail: "Your Bid Ready Journey badges" },
-  { name: "Team", detail: "Invite owners, admins, members, viewers" },
+  { name: "Rewards", detail: "Your Bid Ready Journey badges", href: "/app/rewards" },
+  { name: "Team", detail: "Invite owners, admins, members, viewers", href: "/app/team" },
   { name: "Plan", detail: "Your current plan", href: "/app/plan" },
-  { name: "Ads", detail: "Promote your business in the Hub" },
+  { name: "Ads", detail: "Promote your business in the Hub", href: "/app/ads" },
   { name: "Profile", detail: "Business details, NAICS, service area" },
   { name: "Security", detail: "Sign in, sessions, and data controls" },
 ];
