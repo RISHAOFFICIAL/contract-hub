@@ -5,11 +5,11 @@ import Link from "next/link";
 type Section = { name: string; detail: string; href?: string };
 
 const SECTIONS: Section[] = [
-  { name: "Registrations", detail: "SAM.gov, state, county, and city portals" },
-  { name: "Certifications", detail: "WOSB, HUBZone, DBE, MBE, and local programs" },
-  { name: "Vault", detail: "Document checklist for bids and filings" },
-  { name: "Suppliers", detail: "Your private supplier bench" },
-  { name: "Contacts", detail: "Buyers, primes, and partners" },
+  { name: "Registrations", detail: "SAM.gov, state, county, and city portals", href: "/app/registrations" },
+  { name: "Certifications", detail: "WOSB, HUBZone, DBE, MBE, and local programs", href: "/app/certifications" },
+  { name: "Vault", detail: "Document checklist for bids and filings", href: "/app/vault" },
+  { name: "Suppliers", detail: "Your private supplier bench", href: "/app/suppliers" },
+  { name: "Contacts", detail: "Buyers, primes, and partners", href: "/app/contacts" },
   { name: "Capability Statement", detail: "Generate a print ready one pager" },
   { name: "Saved Searches", detail: "Your daily scan recipes" },
   { name: "Alerts", detail: "New matches, deadlines, renewals" },
