@@ -10,7 +10,7 @@ const SECTIONS: Section[] = [
   { name: "Vault", detail: "Document checklist for bids and filings", href: "/app/vault" },
   { name: "Suppliers", detail: "Your private supplier bench", href: "/app/suppliers" },
   { name: "Contacts", detail: "Buyers, primes, and partners", href: "/app/contacts" },
-  { name: "Capability Statement", detail: "Generate a print ready one pager" },
+  { name: "Capability Statement", detail: "Generate a print ready one pager", href: "/app/capability" },
   { name: "Saved Searches", detail: "Your daily scan recipes", href: "/app/saved-searches" },
   { name: "Alerts", detail: "New matches, deadlines, renewals", href: "/app/alerts" },
   { name: "Rewards", detail: "Your Bid Ready Journey badges" },

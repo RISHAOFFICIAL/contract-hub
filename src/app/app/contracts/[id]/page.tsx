@@ -152,15 +152,37 @@ export default async function ContractDetailPage({
         </div>
       </section>
 
+      {/* Workbench: live */}
+      <section className="glass rounded-3xl p-6">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-display text-lg font-semibold text-forest">
+              Proposal Workbench
+            </h2>
+            <p className="mt-1 text-sm text-ink-faint">
+              Compliance matrix, solicitation analyzer, proposal builder,
+              supplier quotes, margin calculator, submission checklist, and
+              guardrails for this bid.
+            </p>
+          </div>
+          <Link
+            href={`/app/contracts/${contract.id}/workbench`}
+            className="btn-glass btn-primary-glass shrink-0 px-5 py-2.5 text-sm"
+          >
+            Open workbench
+          </Link>
+        </div>
+      </section>
+
       {/* Later phases */}
-      {["Milestones", "Workbench", "Invoices"].map((section) => (
+      {["Milestones", "Invoices"].map((section) => (
         <section key={section} className="glass rounded-3xl p-6">
           <h2 className="font-display text-lg font-semibold text-forest">
             {section}
           </h2>
           <p className="mt-1 text-sm text-ink-faint">
-            Coming in a later phase. Contract tracking is live now; delivery
-            milestones, the bid workbench, and invoicing arrive next.
+            Coming in a later phase. Delivery milestones and invoicing arrive
+            next.
           </p>
         </section>
       ))}
