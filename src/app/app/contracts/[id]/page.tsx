@@ -4,15 +4,54 @@ import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
 import {
   DeadlinePill,
+  Field,
   formatDate,
   formatMoney,
   PageHeader,
+  Select,
+  TextArea,
+  TextInput,
 } from "@/components/ui";
-import { DeleteButton } from "@/components/ui-client";
+import { DeleteButton, SubmitButton } from "@/components/ui-client";
 import { deleteContract } from "../actions";
+import {
+  addInvoice,
+  addMilestone,
+  deleteInvoice,
+  deleteMilestone,
+  setInvoiceStatus,
+  toggleMilestone,
+} from "./milestones-invoices-actions";
 import { StageMoveButtons } from "../contract-card";
 import { stageLabel, stagePillClass, type ContractRow } from "../stages";
 import TalkToUpdate from "./talk-to-update";
+
+type MilestoneRow = {
+  id: string;
+  title: string | null;
+  due_date: string | null;
+  completed: boolean;
+  completed_at: string | null;
+  notes: string | null;
+};
+
+type InvoiceRow = {
+  id: string;
+  invoice_number: string | null;
+  amount: number | string | null;
+  issued_date: string | null;
+  due_date: string | null;
+  status: string | null;
+  paid_at: string | null;
+  notes: string | null;
+};
+
+function invoicePillClass(status: string | null): string {
+  if (status === "paid") return "pill-active";
+  if (status === "sent") return "pill-warn";
+  if (status === "overdue") return "pill-bad";
+  return "pill-muted";
+}
 
 function DetailRow({
   label,
@@ -53,8 +92,37 @@ export default async function ContractDetailPage({
   if (!data) notFound();
   const contract = data as ContractRow;
 
+  const [{ data: milestoneRows }, { data: invoiceRows }] = await Promise.all([
+    supabase
+      .from("milestones")
+      .select("id, title, due_date, completed, completed_at, notes")
+      .eq("business_id", businessId)
+      .eq("contract_id", contract.id)
+      .order("completed", { ascending: true })
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("invoices")
+      .select(
+        "id, invoice_number, amount, issued_date, due_date, status, paid_at, notes"
+      )
+      .eq("business_id", businessId)
+      .eq("contract_id", contract.id)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  const milestones = (milestoneRows ?? []) as MilestoneRow[];
+  const invoices = (invoiceRows ?? []) as InvoiceRow[];
+
   const value = formatMoney(contract.contract_value);
   const deadline = formatDate(contract.deadline);
+  const milestonesDone = milestones.filter((m) => m.completed).length;
+  const invoicesPaidTotal = invoices
+    .filter((i) => i.status === "paid")
+    .reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+  const invoicesOutstandingTotal = invoices
+    .filter((i) => i.status !== "paid")
+    .reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
 
   return (
     <div className="space-y-5">
@@ -189,18 +257,244 @@ export default async function ContractDetailPage({
         </div>
       </section>
 
-      {/* Later phases */}
-      {["Milestones", "Invoices"].map((section) => (
-        <section key={section} className="glass rounded-3xl p-6">
+      {/* Milestones */}
+      <section className="glass rounded-3xl p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-display text-lg font-semibold text-forest">
-            {section}
+            Milestones
           </h2>
-          <p className="mt-1 text-sm text-ink-faint">
-            Coming in a later phase. Delivery milestones and invoicing arrive
-            next.
+          <span className="text-sm text-ink-faint">
+            {milestonesDone} of {milestones.length} complete
+          </span>
+        </div>
+        <p className="mt-1 text-sm text-ink-faint">
+          Delivery milestones for this contract. Milestones added with Talk to
+          update show up here too.
+        </p>
+
+        {milestones.length === 0 ? (
+          <p className="mt-4 rounded-xl bg-ivory px-4 py-3 text-sm text-ink-soft">
+            No milestones yet. Add the first one below.
           </p>
-        </section>
-      ))}
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {milestones.map((m) => (
+              <li
+                key={m.id}
+                className="flex flex-wrap items-center gap-3 rounded-xl bg-ivory px-4 py-3"
+              >
+                <form
+                  action={toggleMilestone.bind(
+                    null,
+                    m.id,
+                    contract.id,
+                    !m.completed
+                  )}
+                >
+                  <button
+                    type="submit"
+                    className="btn-glass glass shrink-0 px-3 py-1.5 text-xs font-semibold text-forest"
+                  >
+                    {m.completed ? "Reopen" : "Mark complete"}
+                  </button>
+                </form>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={`text-sm font-semibold text-ink ${
+                      m.completed ? "line-through opacity-60" : ""
+                    }`}
+                  >
+                    {m.title}
+                  </p>
+                  {m.notes && (
+                    <p className="mt-0.5 whitespace-pre-wrap text-xs text-ink-soft">
+                      {m.notes}
+                    </p>
+                  )}
+                </div>
+                {m.completed ? (
+                  <span className="pill pill-active">Done</span>
+                ) : (
+                  <DeadlinePill dateStr={m.due_date} />
+                )}
+                {m.due_date && (
+                  <span className="text-xs text-ink-faint">
+                    Due {formatDate(m.due_date)}
+                  </span>
+                )}
+                <DeleteButton
+                  action={deleteMilestone.bind(null, m.id, contract.id)}
+                  confirmText="Delete this milestone? This cannot be undone."
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <form
+          action={addMilestone.bind(null, contract.id)}
+          className="mt-5 space-y-3 border-t border-ink/10 pt-4"
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Milestone title">
+              <TextInput
+                name="title"
+                required
+                placeholder="e.g. Deliver first shipment"
+              />
+            </Field>
+            <Field label="Due date">
+              <TextInput name="due_date" type="date" />
+            </Field>
+          </div>
+          <Field label="Notes (optional)">
+            <TextArea
+              name="notes"
+              rows={2}
+              placeholder="What counts as done for this milestone?"
+            />
+          </Field>
+          <SubmitButton label="Add milestone" />
+        </form>
+      </section>
+
+      {/* Invoices */}
+      <section className="glass rounded-3xl p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-lg font-semibold text-forest">
+            Invoices
+          </h2>
+          <span className="text-sm text-ink-faint">
+            Paid {formatMoney(invoicesPaidTotal) ?? "$0"} · Outstanding{" "}
+            {formatMoney(invoicesOutstandingTotal) ?? "$0"}
+          </span>
+        </div>
+        <p className="mt-1 text-sm text-ink-faint">
+          Invoices for this contract. Invoice drafts created with Talk to
+          update show up here too. Marking an invoice paid counts toward the
+          First invoice paid badge.
+        </p>
+
+        {invoices.length === 0 ? (
+          <p className="mt-4 rounded-xl bg-ivory px-4 py-3 text-sm text-ink-soft">
+            No invoices yet. Add the first one below.
+          </p>
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {invoices.map((inv) => (
+              <li
+                key={inv.id}
+                className="flex flex-wrap items-center gap-3 rounded-xl bg-ivory px-4 py-3"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-ink">
+                    {inv.invoice_number ?? "Invoice"} ·{" "}
+                    {formatMoney(inv.amount) ?? "No amount"}
+                  </p>
+                  <p className="mt-0.5 text-xs text-ink-soft">
+                    {inv.issued_date
+                      ? `Issued ${formatDate(inv.issued_date)}`
+                      : "Not issued yet"}
+                    {inv.due_date ? ` · Due ${formatDate(inv.due_date)}` : ""}
+                    {inv.paid_at ? ` · Paid ${formatDate(inv.paid_at)}` : ""}
+                  </p>
+                  {inv.notes && (
+                    <p className="mt-0.5 whitespace-pre-wrap text-xs text-ink-soft">
+                      {inv.notes}
+                    </p>
+                  )}
+                </div>
+                <span className={`pill ${invoicePillClass(inv.status)}`}>
+                  {(inv.status ?? "draft").toUpperCase()}
+                </span>
+                {inv.status === "draft" && (
+                  <form
+                    action={setInvoiceStatus.bind(
+                      null,
+                      inv.id,
+                      contract.id,
+                      "sent"
+                    )}
+                  >
+                    <button
+                      type="submit"
+                      className="btn-glass glass shrink-0 px-3 py-1.5 text-xs font-semibold text-forest"
+                    >
+                      Mark sent
+                    </button>
+                  </form>
+                )}
+                {inv.status !== "paid" && (
+                  <form
+                    action={setInvoiceStatus.bind(
+                      null,
+                      inv.id,
+                      contract.id,
+                      "paid"
+                    )}
+                  >
+                    <button
+                      type="submit"
+                      className="btn-glass btn-primary-glass shrink-0 px-3 py-1.5 text-xs"
+                    >
+                      Mark paid
+                    </button>
+                  </form>
+                )}
+                <DeleteButton
+                  action={deleteInvoice.bind(null, inv.id, contract.id)}
+                  confirmText="Delete this invoice? This cannot be undone."
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <form
+          action={addInvoice.bind(null, contract.id)}
+          className="mt-5 space-y-3 border-t border-ink/10 pt-4"
+        >
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Field label="Amount">
+              <TextInput
+                name="amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                required
+                placeholder="e.g. 2500"
+              />
+            </Field>
+            <Field label="Issued date">
+              <TextInput name="issued_date" type="date" />
+            </Field>
+            <Field label="Due date">
+              <TextInput name="due_date" type="date" />
+            </Field>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Status">
+              <Select name="status" defaultValue="draft">
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+              </Select>
+            </Field>
+            <Field label="Notes (optional)">
+              <TextInput
+                name="notes"
+                placeholder="e.g. First delivery, 50 percent"
+              />
+            </Field>
+          </div>
+          <p className="text-xs text-ink-faint">
+            Invoice numbers are assigned automatically (INV-0001, INV-0002,
+            and so on).
+          </p>
+          <SubmitButton label="Add invoice" />
+        </form>
+      </section>
     </div>
   );
 }
