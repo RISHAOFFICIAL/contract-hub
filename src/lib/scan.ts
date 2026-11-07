@@ -67,9 +67,59 @@ export type ProfileInput = {
 };
 
 /**
+ * Words too generic to match on their own. Without this list, a word
+ * like "services" or "department" would match nearly every listing.
+ */
+const WORD_STOPLIST = new Set([
+  "services",
+  "service",
+  "supplies",
+  "supply",
+  "products",
+  "product",
+  "systems",
+  "system",
+  "general",
+  "public",
+  "management",
+  "program",
+  "programs",
+  "office",
+  "business",
+  "state",
+  "county",
+  "city",
+  "michigan",
+  "detroit",
+  "department",
+  "contract",
+  "contracts",
+  "procurement",
+]);
+
+/**
+ * Significant single words (5 or more letters, not stop-listed) from
+ * expanded terms. Used as a fallback when no whole phrase matches:
+ * "cleaning services" should still catch "Cleaning and Maintenance".
+ */
+function matchWords(terms: TermInfo[]): { word: string; via: string | null }[] {
+  const out: { word: string; via: string | null }[] = [];
+  const seen = new Set<string>();
+  for (const t of terms) {
+    for (const w of t.term.toLowerCase().split(/[^a-z0-9]+/)) {
+      if (w.length < 5 || WORD_STOPLIST.has(w) || seen.has(w)) continue;
+      seen.add(w);
+      out.push({ word: w, via: t.via });
+    }
+  }
+  return out;
+}
+
+/**
  * Score an opportunity 0 to 100 against the business profile.
  * Title term match +40, description match +25, NAICS prefix match +25,
- * synonym match +10 bonus.
+ * synonym match +10 bonus. When no whole phrase matches, a significant
+ * single word in the title (+40) or description (+25) counts instead.
  */
 export function scoreOpportunity(
   opp: OpportunityInput,
@@ -88,12 +138,27 @@ export function scoreOpportunity(
       ? terms.find((t) => desc.includes(t.term)) ?? null
       : null;
 
+  // Word fallback: no whole phrase matched, so try significant words.
+  const words = titleTerm == null && descTerm == null ? matchWords(terms) : [];
+  const titleWord =
+    words.find((w) => title.includes(w.word)) ?? null;
+  const descWord =
+    titleWord == null
+      ? words.find((w) => desc.includes(w.word)) ?? null
+      : null;
+
   if (titleTerm) {
     score += 40;
     reasons.push(`Title matches '${titleTerm.term}'`);
   } else if (descTerm) {
     score += 25;
     reasons.push(`Description matches '${descTerm.term}'`);
+  } else if (titleWord) {
+    score += 40;
+    reasons.push(`Title matches '${titleWord.word}'`);
+  } else if (descWord) {
+    score += 25;
+    reasons.push(`Description matches '${descWord.word}'`);
   }
 
   const oppNaics = (opp.naics ?? "").replace(/\D/g, "");
@@ -106,7 +171,8 @@ export function scoreOpportunity(
     reasons.push(`NAICS ${oppNaics} in your profile`);
   }
 
-  const viaSynonym = titleTerm?.via ?? descTerm?.via ?? null;
+  const viaSynonym =
+    titleTerm?.via ?? descTerm?.via ?? titleWord?.via ?? descWord?.via ?? null;
   if (viaSynonym) {
     score += 10;
     reasons.push(`related to '${viaSynonym}'`);
@@ -123,9 +189,10 @@ export function scoreOpportunity(
 export type RawOpp = {
   title: string;
   buyer: string | null;
-  source_name: "SAM.gov";
+  source_name: string;
   source_url: string;
   type: "active_bid" | "upcoming" | "rfi" | "sources_sought" | "presolicitation";
+  level: string;
   posted_date: string | null;
   deadline: string | null;
   naics: string | null;
@@ -173,6 +240,7 @@ function mapSamNotice(n: SamNotice): RawOpp | null {
     source_name: "SAM.gov",
     source_url: `https://sam.gov/opp/${noticeId}/view`,
     type: mapSamType(n.ptype),
+    level: "federal",
     posted_date: n.postedDate ?? null,
     deadline: n.responseDeadLine ?? null,
     naics: n.naicsCodes?.[0] ?? null,
@@ -226,6 +294,288 @@ export async function fetchSamOpportunities(
   }
 }
 
+/* ---------- Shared fetch helpers ---------- */
+
+const FETCH_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ContractHub/1.0";
+
+/** Decode the handful of HTML entities that show up in feeds and pages. */
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#(\d+);/g, (_m, code: string) =>
+      String.fromCharCode(Number(code))
+    )
+    .replace(/&#x([0-9a-fA-F]+);/g, (_m, code: string) =>
+      String.fromCharCode(parseInt(code, 16))
+    );
+}
+
+/** "2026-11-10 22:00:00" (UTC) to ISO string, or null. */
+function utcDateTimeToIso(s: string | null | undefined): string | null {
+  if (!s) return null;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+  if (!m) return null;
+  const d = new Date(
+    Date.UTC(
+      Number(m[1]),
+      Number(m[2]) - 1,
+      Number(m[3]),
+      Number(m[4]),
+      Number(m[5]),
+      Number(m[6])
+    )
+  );
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+/** "11/24/2026" to an ISO date string, or null. */
+function usDateToIso(s: string | null | undefined): string | null {
+  if (!s) return null;
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  return `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}T00:00:00.000Z`;
+}
+
+/* ---------- Detroit Bonfire fetching ---------- */
+
+type BonfireProject = {
+  ProjectID?: string;
+  ReferenceID?: string;
+  ProjectName?: string;
+  DateClose?: string;
+  DepartmentID?: string;
+};
+
+type BonfireRssItem = {
+  projectId: string;
+  title: string;
+  description: string | null;
+  postedDate: string | null;
+};
+
+function parseBonfireRss(xml: string): BonfireRssItem[] {
+  const items: BonfireRssItem[] = [];
+  const blocks = xml.match(/<item>([\s\S]*?)<\/item>/g) ?? [];
+  for (const block of blocks) {
+    const title = block.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "";
+    const link = block.match(/<link>([\s\S]*?)<\/link>/)?.[1] ?? "";
+    const desc = block.match(/<description>([\s\S]*?)<\/description>/)?.[1];
+    const pubDate = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1];
+    const projectId = link.match(/\/opportunities\/(\d+)/)?.[1] ?? "";
+    if (!projectId || !title) continue;
+    const cleanDesc = desc
+      ? decodeEntities(desc.replace(/Project closes [^.]*\./, "").trim())
+      : null;
+    const posted = pubDate ? new Date(pubDate.trim()) : null;
+    items.push({
+      projectId,
+      title: decodeEntities(title.trim()).replace(/\s+/g, " "),
+      description: cleanDesc && cleanDesc.length > 0 ? cleanDesc : null,
+      postedDate:
+        posted && !Number.isNaN(posted.getTime())
+          ? posted.toISOString()
+          : null,
+    });
+  }
+  return items;
+}
+
+/**
+ * Query the City of Detroit Bonfire portal for open opportunities.
+ * No key, no login. Uses the portal's own anonymous JSON endpoint
+ * (structured close dates) joined with the public RSS feed
+ * (descriptions). Falls back to whichever one answers.
+ * Returns [] on any failure; never throws.
+ */
+export async function fetchBonfireOpportunities(
+  keywords: string
+): Promise<RawOpp[]> {
+  try {
+    const [jsonRes, rssRes] = await Promise.allSettled([
+      fetch(
+        "https://detroit.bonfirehub.com/PublicPortal/getOpenPublicOpportunitiesSectionData",
+        { cache: "no-store", headers: { "User-Agent": FETCH_UA } }
+      ),
+      fetch("https://detroit.bonfirehub.com/opportunities/rss", {
+        cache: "no-store",
+        headers: { "User-Agent": FETCH_UA },
+      }),
+    ]);
+
+    const projects = new Map<string, BonfireProject>();
+    if (jsonRes.status === "fulfilled" && jsonRes.value.ok) {
+      const data = (await jsonRes.value.json()) as {
+        payload?: { projects?: Record<string, BonfireProject> };
+      };
+      const listed = data?.payload?.projects ?? {};
+      for (const p of Object.values(listed)) {
+        if (p?.ProjectID) projects.set(p.ProjectID, p);
+      }
+    }
+
+    const rssById = new Map<string, BonfireRssItem>();
+    if (rssRes.status === "fulfilled" && rssRes.value.ok) {
+      const xml = await rssRes.value.text();
+      for (const item of parseBonfireRss(xml)) {
+        rssById.set(item.projectId, item);
+      }
+    }
+
+    // If the JSON endpoint answered, it is the source of truth for the
+    // open set. If only RSS answered, build from RSS alone.
+    const ids = Array.from(
+      new Set([...Array.from(projects.keys()), ...Array.from(rssById.keys())])
+    );
+    if (ids.length === 0) return [];
+
+    const terms = keywords.trim()
+      ? expandTerms([keywords.trim()])
+      : [];
+    const words = matchWords(terms);
+    const out: RawOpp[] = [];
+    for (const id of ids) {
+      const p = projects.get(id);
+      const rss = rssById.get(id);
+      const title = p?.ProjectName ?? rss?.title ?? "";
+      if (!title) continue;
+      const description = rss?.description ?? null;
+      if (terms.length > 0) {
+        const haystack = `${title} ${description ?? ""}`.toLowerCase();
+        const phraseHit = terms.some((t) => haystack.includes(t.term));
+        const wordHit = words.some((w) => haystack.includes(w.word));
+        if (!phraseHit && !wordHit) continue;
+      }
+      const refMatch = rss?.title.match(/Reference #: (\d+)\. Name: (.*)/);
+      out.push({
+        title: refMatch ? refMatch[2].trim() : title,
+        buyer: "City of Detroit",
+        source_name: "Detroit Bonfire",
+        source_url: `https://detroit.bonfirehub.com/opportunities/${id}`,
+        type: "active_bid",
+        level: "city",
+        posted_date: rss?.postedDate ?? null,
+        deadline: utcDateTimeToIso(p?.DateClose),
+        naics: null,
+        set_aside: null,
+        solicitation_number: p?.ReferenceID ?? refMatch?.[1] ?? null,
+        description,
+      });
+    }
+    return out;
+  } catch (err) {
+    console.error("Bonfire search error", err);
+    return [];
+  }
+}
+
+/* ---------- MITN (BidNet Direct) fetching ---------- */
+
+const MITN_BASE = "https://www.bidnetdirect.com/mitn/solicitations/open-bids";
+
+type MitnRow = {
+  title: string;
+  url: string;
+  published: string | null;
+  closing: string | null;
+};
+
+function parseMitnRows(htmlText: string): MitnRow[] {
+  const rows: MitnRow[] = [];
+  const blocks =
+    htmlText.match(/<tr[^>]*data-index="\d+"[^>]*>([\s\S]*?)<\/tr>/g) ?? [];
+  for (const block of blocks) {
+    // The anchor text can contain a highlight span around the search
+    // keyword, so capture the inner HTML and strip tags after.
+    const link = block.match(
+      /<a[^>]*href="([^"]*\/mitn\/solicitations\/open-bids\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/
+    );
+    if (!link) continue;
+    const title = decodeEntities(
+      link[2].replace(/<[^>]+>/g, "").trim()
+    ).replace(/\s+/g, " ");
+    if (!title) continue;
+    const published =
+      block.match(/Published[^0-9]*(\d{1,2}\/\d{1,2}\/\d{4})/)?.[1] ?? null;
+    const closing =
+      block.match(/Closing[^0-9]*(\d{1,2}\/\d{1,2}\/\d{4})/)?.[1] ?? null;
+    const href = decodeEntities(link[1]);
+    rows.push({
+      title,
+      url: href.startsWith("http")
+        ? href
+        : `https://www.bidnetdirect.com${href}`,
+      published: usDateToIso(published),
+      closing: usDateToIso(closing),
+    });
+  }
+  return rows;
+}
+
+/**
+ * Query MITN (Michigan Intergovernmental Trade Network, BidNet Direct)
+ * for open bids. No login needed to list titles and deadlines; the
+ * buyer, solicitation number, and description are locked behind a
+ * free BidNet account, so those fields stay empty and the description
+ * says so plainly. Returns [] on any failure; never throws.
+ */
+export async function fetchMitnOpportunities(
+  keywords: string
+): Promise<RawOpp[]> {
+  try {
+    const q = keywords.trim();
+    const firstUrl = q
+      ? `${MITN_BASE}?keywords=${encodeURIComponent(q)}`
+      : MITN_BASE;
+    const pages: string[] = [firstUrl];
+    // Keyword searches rarely fill a page; without keywords the open
+    // set spans about 8 pages, so cap at 2 pages either way.
+    pages.push(q ? `${firstUrl}&page=2` : `${MITN_BASE}/page2`);
+
+    const seen = new Set<string>();
+    const out: RawOpp[] = [];
+    for (const url of pages) {
+      const res = await fetch(url, {
+        cache: "no-store",
+        headers: { "User-Agent": FETCH_UA },
+      });
+      if (!res.ok) {
+        console.error("MITN search failed", res.status);
+        continue;
+      }
+      const rows = parseMitnRows(await res.text());
+      if (rows.length === 0) break;
+      for (const row of rows) {
+        if (seen.has(row.url)) continue;
+        seen.add(row.url);
+        out.push({
+          title: row.title,
+          buyer: null,
+          source_name: "MITN",
+          source_url: row.url,
+          type: "active_bid",
+          level: "local",
+          posted_date: row.published,
+          deadline: row.closing,
+          naics: null,
+          set_aside: null,
+          solicitation_number: null,
+          description:
+            "Buyer, solicitation number, and documents need a free BidNet account. View the full listing on BidNet.",
+        });
+      }
+      if (rows.length < 37) break;
+    }
+    return out;
+  } catch (err) {
+    console.error("MITN search error", err);
+    return [];
+  }
+}
+
 /* ---------- Running a scan ---------- */
 
 export type SavedSearchTarget = {
@@ -234,7 +584,7 @@ export type SavedSearchTarget = {
   keywords?: string | null;
 };
 
-export type FilteredOut = { title: string; reason: string };
+export type FilteredOut = { title: string; reason: string; source?: string };
 
 export type ScanSummary = {
   found: number;
@@ -258,9 +608,16 @@ export async function runScanForSearch(
   search: SavedSearchTarget
 ): Promise<ScanSummary> {
   const keywords = (search.keywords ?? "").trim();
-  const found: RawOpp[] = keywords
-    ? await fetchSamOpportunities(keywords)
-    : [];
+  // SAM.gov, Detroit Bonfire, and MITN in parallel. Each fetcher
+  // returns [] on failure, so one source going down never blocks
+  // the others. Michigan SIGMA has no server-side method and is
+  // surfaced as a manual check on the Opportunities page instead.
+  const [samFound, bonfireFound, mitnFound] = await Promise.all([
+    keywords ? fetchSamOpportunities(keywords) : Promise.resolve([]),
+    fetchBonfireOpportunities(keywords),
+    fetchMitnOpportunities(keywords),
+  ]);
+  const found: RawOpp[] = [...samFound, ...bonfireFound, ...mitnFound];
 
   // Read the business profile for scoring.
   const { data: business } = await supabase
@@ -317,6 +674,7 @@ export async function runScanForSearch(
       filteredOut.push({
         title: raw.title,
         reason: `Score ${score}/100 is below the ${SCORE_THRESHOLD} point bar (${reason})`,
+        source: raw.source_name,
       });
       continue;
     }
@@ -325,6 +683,7 @@ export async function runScanForSearch(
       filteredOut.push({
         title: raw.title,
         reason: "Already in your opportunities",
+        source: raw.source_name,
       });
       continue;
     }
@@ -336,7 +695,7 @@ export async function runScanForSearch(
       source_name: raw.source_name,
       source_url: raw.source_url,
       type: raw.type,
-      level: "federal",
+      level: raw.level,
       posted_date: raw.posted_date,
       deadline: raw.deadline,
       naics: raw.naics,
@@ -379,14 +738,24 @@ export async function runScanForSearch(
     });
   }
 
-  const perSource = {
-    "SAM.gov": {
-      found: found.length,
-      filtered: filteredOut.length,
-      added: toInsert.length,
-      filteredOut,
-    },
-  };
+  const sourceNames = ["SAM.gov", "Detroit Bonfire", "MITN"];
+  const perSource: Record<
+    string,
+    {
+      found: number;
+      filtered: number;
+      added: number;
+      filteredOut: FilteredOut[];
+    }
+  > = {};
+  for (const name of sourceNames) {
+    perSource[name] = {
+      found: found.filter((r) => r.source_name === name).length,
+      filtered: filteredOut.filter((f) => f.source === name).length,
+      added: toInsert.filter((r) => r.source_name === name).length,
+      filteredOut: filteredOut.filter((f) => f.source === name),
+    };
+  }
 
   if (search.id) {
     await supabase
@@ -399,7 +768,7 @@ export async function runScanForSearch(
   await supabase.from("scan_history").insert({
     business_id: businessId,
     saved_search_id: search.id ?? null,
-    sources_checked: ["SAM.gov"],
+    sources_checked: ["SAM.gov", "Detroit Bonfire", "MITN"],
     found_count: found.length,
     filtered_count: filteredOut.length,
     added_count: toInsert.length,

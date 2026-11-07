@@ -256,6 +256,21 @@ export default async function OpportunitiesPage() {
         }
       />
 
+      <p className="rounded-xl bg-ivory px-4 py-3 text-sm text-ink-soft">
+        Scans cover SAM.gov, Detroit Bonfire, and MITN. Michigan SIGMA
+        cannot be scanned automatically, check it by hand with Guest
+        Access:{" "}
+        <a
+          href="https://sigma.michigan.gov/PRDVSS1X1/Advantage4"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-brass-dark underline"
+        >
+          sigma.michigan.gov
+        </a>
+        .
+      </p>
+
       {hasActiveSearches === 0 && (
         <section className="card-lux space-y-3 p-5">
           <h2 className="font-display text-lg font-semibold text-forest">
@@ -287,7 +302,7 @@ export default async function OpportunitiesPage() {
       {newOpps.length === 0 ? (
         <EmptyState
           title="No new matches"
-          body="Run a scan to pull fresh listings from SAM.gov. Matches that score 40 or higher land here."
+          body="Run a scan to pull fresh listings from SAM.gov, Detroit Bonfire, and MITN. Matches that score 40 or higher land here."
           ctaHref={hasActiveSearches > 0 ? undefined : "/app/saved-searches/new"}
           ctaLabel={
             hasActiveSearches > 0 ? undefined : "Create a saved search"
