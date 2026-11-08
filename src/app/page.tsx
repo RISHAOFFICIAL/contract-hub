@@ -147,6 +147,14 @@ export default function LandingPage() {
           General information only, not legal advice. Never enter government
           portal passwords here.
         </p>
+        <p className="mt-3">
+          <Link
+            href="/privacy"
+            className="font-semibold text-forest hover:text-forest-light"
+          >
+            Privacy Policy
+          </Link>
+        </p>
       </footer>
     </main>
   );
