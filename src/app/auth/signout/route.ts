@@ -5,7 +5,11 @@ async function signOutAndRedirect(request: Request) {
   const supabase = await createClient();
   await supabase.auth.signOut();
   const { origin } = new URL(request.url);
-  return NextResponse.redirect(`${origin}/login`);
+  // 303, not the default 307: a 307 would make the browser repeat the
+  // request with the same method, so a POST sign-out would re-POST to
+  // /login, a GET-only page route, and Next.js would answer 405.
+  // A 303 makes the browser follow with GET instead.
+  return NextResponse.redirect(`${origin}/login`, 303);
 }
 
 export async function POST(request: Request) {
