@@ -12,6 +12,8 @@ const SUGGESTED = [
   "How do I get an EIN?",
   "How do I build business credit?",
   "How do I advertise my business?",
+  "What are the contract basics?",
+  "How do I sign in?",
 ];
 
 function AnswerCard({ answer }: { answer: GuideAnswer }) {

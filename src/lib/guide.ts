@@ -177,8 +177,8 @@ export function getTopBlocker(ctx: GuideContext): Blocker {
     return {
       title: "Complete your business profile",
       body: "Everything in Contract Hub keys off your business profile. Add your legal business name, city, state, and NAICS codes so scans, the readiness meter, and certification guidance match your actual business.",
-      href: "/app",
-      hrefLabel: "Open dashboard",
+      href: "/app/profile",
+      hrefLabel: "Complete your profile",
     };
   }
 
@@ -491,6 +491,56 @@ export function answerQuestion(
       title: "Which certifications fit your business",
       body: paras,
       action: { label: "Open certifications", href: "/app/certifications" },
+    };
+  }
+
+  // Contract basics
+  if (
+    has(
+      "contract basics",
+      "what is a contract",
+      "how do contracts work",
+      "contract stages",
+      "bid stages",
+      "what is a bid",
+      "how do i bid"
+    )
+  ) {
+    return {
+      title: "Contract basics",
+      body: [
+        "A government contract is a formal agreement to supply goods or services to a government buyer. You find open opportunities, check that you meet the requirements, submit a bid or proposal by the deadline, and the buyer awards the work to the best value offer.",
+        "In Contract Hub, every opportunity you track moves through 8 stages: watching, preparing, submitted, shortlisted, awarded, in progress, completed, and closed out. Move a contract forward as it progresses, and the dashboard keeps deadlines and renewals in view.",
+        "Before you bid, read the solicitation carefully: the deadline, the delivery location, the required certifications, and any insurance or bonding. The Workbench compliance checklist helps you catch those requirements before you submit.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // Signing in
+  if (
+    has(
+      "sign in",
+      "signing in",
+      "log in",
+      "login",
+      "log me in",
+      "magic link",
+      "forgot password",
+      "reset my password"
+    )
+  ) {
+    return {
+      title: "Signing in to Contract Hub",
+      body: [
+        "Sign in at the login page with the email and password you used to sign up. If you prefer no password, choose the email link option and Contract Hub sends you a magic link to sign in with one tap.",
+        "If you forgot your password, use the reset option on the login page and follow the link sent to your email. Never share your password with anyone, and Contract Hub will never ask for it in chat or by email.",
+        "To sign out, use the Sign out button at the top of your dashboard. Your data stays locked to your account.",
+        DISCLAIMER,
+      ],
+      links: [{ label: "Go to the login page", href: "/login" }],
+      action: { label: "Open the login page", href: "/login" },
     };
   }
 

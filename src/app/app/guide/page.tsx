@@ -51,7 +51,7 @@ export default async function GuidePage() {
   const roadmap = [
     {
       label: "Complete your business profile",
-      href: "/app",
+      href: "/app/profile",
       done: !!ctx.profile.legalName,
     },
     {

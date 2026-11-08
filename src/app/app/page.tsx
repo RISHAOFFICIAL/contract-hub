@@ -193,6 +193,21 @@ export default async function DashboardPage() {
             <div className="meter-fill h-3" style={{ width: `${readiness}%` }} />
           </div>
         </div>
+        {!profileDone ? (
+          <Link
+            href="/app/profile"
+            className="btn-glass btn-primary-glass mt-4 inline-block px-5 py-2 text-sm"
+          >
+            Complete your business profile
+          </Link>
+        ) : (
+          <Link
+            href="/app/profile"
+            className="mt-4 inline-block text-sm font-semibold text-brass-dark"
+          >
+            Edit business profile
+          </Link>
+        )}
       </section>
 
       {/* Guide card */}
