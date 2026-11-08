@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -58,6 +59,18 @@ export default function SignupPage() {
             Free to start. A blank business profile is created for you
             automatically.
           </p>
+
+          <div className="mt-6">
+            <GoogleSignInButton />
+          </div>
+
+          <div className="mt-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-ink/10" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-ink-soft">
+              or sign up with email
+            </span>
+            <span className="h-px flex-1 bg-ink/10" />
+          </div>
 
           {error && (
             <p className="mt-4 rounded-xl bg-[#f6e3df] px-4 py-3 text-sm font-medium text-[#8c3b2e]">

@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 export default function LoginPage() {
   return (
@@ -83,6 +84,18 @@ function LoginForm() {
           <p className="mt-2 text-ink-soft">
             Sign in to your Contract Hub account.
           </p>
+
+          <div className="mt-6">
+            <GoogleSignInButton next={redirect} />
+          </div>
+
+          <div className="mt-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-ink/10" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-ink-soft">
+              or sign in with email
+            </span>
+            <span className="h-px flex-1 bg-ink/10" />
+          </div>
 
           <div className="mt-6 flex rounded-full bg-ivory-deep p-1">
             <button
