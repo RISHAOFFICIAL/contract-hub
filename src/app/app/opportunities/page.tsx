@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
+import { getPlanAccess, FREE_CONTRACT_LIMIT } from "@/lib/billing";
 import {
   AddButton,
   DeadlinePill,
@@ -41,7 +42,13 @@ type OpportunityRow = {
   solicitation_number: string | null;
 };
 
-function OpportunityCard({ opp }: { opp: OpportunityRow }) {
+function OpportunityCard({
+  opp,
+  atCap,
+}: {
+  opp: OpportunityRow;
+  atCap: boolean;
+}) {
   return (
     <article className="card-lux space-y-3 p-5">
       <div className="flex items-start justify-between gap-3">
@@ -113,14 +120,23 @@ function OpportunityCard({ opp }: { opp: OpportunityRow }) {
       )}
 
       <div className="flex flex-wrap items-center gap-2 pt-1">
-        <form action={trackOpportunity.bind(null, opp.id)}>
-          <button
-            type="submit"
+        {atCap ? (
+          <Link
+            href="/app/plan"
             className="btn-glass btn-primary-glass px-4 py-2 text-sm"
           >
-            Track this
-          </button>
-        </form>
+            Upgrade to Pro to track
+          </Link>
+        ) : (
+          <form action={trackOpportunity.bind(null, opp.id)}>
+            <button
+              type="submit"
+              className="btn-glass btn-primary-glass px-4 py-2 text-sm"
+            >
+              Track this
+            </button>
+          </form>
+        )}
         <form action={dismissOpportunity.bind(null, opp.id)}>
           <button
             type="submit"
@@ -199,9 +215,15 @@ function ScanSummary({ row }: { row: {
   );
 }
 
-export default async function OpportunitiesPage() {
+export default async function OpportunitiesPage({
+  searchParams,
+}: {
+  searchParams: { limit?: string };
+}) {
   const businessId = await getBusinessId();
   const supabase = await createClient();
+  const access = await getPlanAccess();
+  const atCap = !access.canTrackMore;
 
   const { data: opps } = businessId
     ? await supabase
@@ -255,6 +277,28 @@ export default async function OpportunitiesPage() {
           )
         }
       />
+
+      {searchParams.limit === "reached" && (
+        <p className="rounded-2xl bg-brass-pale px-4 py-3 text-sm text-ink">
+          You have reached the Free limit of {FREE_CONTRACT_LIMIT} tracked
+          contracts.{" "}
+          <Link href="/app/plan" className="font-semibold text-forest underline">
+            Upgrade to Pro
+          </Link>{" "}
+          for unlimited tracking.
+        </p>
+      )}
+
+      {atCap && searchParams.limit !== "reached" && (
+        <p className="rounded-2xl bg-ivory px-4 py-3 text-sm text-ink-soft">
+          You are at the Free limit of {FREE_CONTRACT_LIMIT} tracked
+          contracts.{" "}
+          <Link href="/app/plan" className="font-semibold text-forest underline">
+            Upgrade to Pro
+          </Link>{" "}
+          to track more.
+        </p>
+      )}
 
       <p className="rounded-xl bg-ivory px-4 py-3 text-sm text-ink-soft">
         Scans cover SAM.gov, Detroit Bonfire, and MITN. Michigan SIGMA
@@ -311,7 +355,7 @@ export default async function OpportunitiesPage() {
       ) : (
         <div className="space-y-4">
           {newOpps.map((opp) => (
-            <OpportunityCard key={opp.id} opp={opp} />
+            <OpportunityCard key={opp.id} opp={opp} atCap={atCap} />
           ))}
         </div>
       )}

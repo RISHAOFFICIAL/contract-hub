@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
+import { getPlanAccess } from "@/lib/billing";
 import { runScanForSearch } from "@/lib/scan";
 import type { SavedSearchRow } from "./labels";
 
@@ -38,6 +39,14 @@ function payload(formData: FormData) {
 
 export async function createSavedSearch(formData: FormData) {
   const businessId = await requireBusinessId();
+
+  // Saved searches are a Pro feature. One-off keyword scans stay free.
+  // Existing searches keep running for Pro and early members.
+  const access = await getPlanAccess();
+  if (!access.isPro) {
+    redirect("/app/saved-searches?pro=required");
+  }
+
   const supabase = await createClient();
   await supabase
     .from("saved_searches")

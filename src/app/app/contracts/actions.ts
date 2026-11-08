@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
+import { getPlanAccess } from "@/lib/billing";
 import { STAGES } from "./stages";
 
 function str(v: FormDataEntryValue | null): string | null {
@@ -19,6 +20,13 @@ async function requireBusinessId(): Promise<string> {
 
 export async function createContract(formData: FormData) {
   const businessId = await requireBusinessId();
+
+  // Free tracks up to 3 contracts. Pro and early members are unlimited.
+  const access = await getPlanAccess();
+  if (!access.canTrackMore) {
+    redirect("/app/contracts?limit=reached");
+  }
+
   const supabase = await createClient();
 
   const value = str(formData.get("contract_value"));

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
+import { getPlanAccess } from "@/lib/billing";
 import {
   AddButton,
   EmptyState,
@@ -99,6 +100,7 @@ const GROUPS = [
 export default async function VaultPage() {
   const supabase = await createClient();
   const businessId = await getBusinessId();
+  const access = await getPlanAccess();
 
   let documents: VaultRow[] = [];
   if (businessId) {
@@ -119,6 +121,21 @@ export default async function VaultPage() {
 
       <p className="rounded-2xl bg-brass-pale px-4 py-3 text-sm text-ink-soft">
         File uploads arrive in a later phase; this is your checklist for now.
+        {access.isPro ? (
+          " Pro members will be able to upload files here when uploads launch."
+        ) : (
+          <>
+            {" "}
+            File uploads are a Pro feature.{" "}
+            <Link
+              href="/app/plan"
+              className="font-semibold text-forest underline"
+            >
+              Upgrade to Pro
+            </Link>{" "}
+            to upload files when uploads launch.
+          </>
+        )}
       </p>
 
       {documents.length === 0 ? (

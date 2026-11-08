@@ -2,6 +2,7 @@
 // Shared by the opportunities inbox, the cron worker, and manual scans.
 
 import { createClient } from "@/lib/supabase/server";
+import { isProBusiness } from "@/lib/billing";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 
@@ -718,24 +719,29 @@ export async function runScanForSearch(
     if (data?.id) insertedIds.push(data.id as string);
   }
 
-  // Alerts for each new opportunity.
-  for (let i = 0; i < toInsert.length; i++) {
-    const oppId = insertedIds[i];
-    if (!oppId) continue;
-    await supabase.from("alerts").insert({
-      business_id: businessId,
-      type: "opportunity",
-      title: `New match: ${toInsert[i].title}`,
-      body: [
-        toInsert[i].buyer ? `Buyer: ${toInsert[i].buyer}` : null,
-        `Match score: ${toInsert[i].match_score}/100`,
-        toInsert[i].match_reason,
-      ]
-        .filter(Boolean)
-        .join(". "),
-      related_id: oppId,
-      related_table: "opportunities",
-    });
+  // Alerts for each new opportunity. Alerts on new matches are a Pro
+  // feature: Pro and early members get an alert row, Free sees the new
+  // matches in the opportunities inbox without an alert.
+  const alertsEnabled = await isProBusiness(supabase, businessId);
+  if (alertsEnabled) {
+    for (let i = 0; i < toInsert.length; i++) {
+      const oppId = insertedIds[i];
+      if (!oppId) continue;
+      await supabase.from("alerts").insert({
+        business_id: businessId,
+        type: "opportunity",
+        title: `New match: ${toInsert[i].title}`,
+        body: [
+          toInsert[i].buyer ? `Buyer: ${toInsert[i].buyer}` : null,
+          `Match score: ${toInsert[i].match_score}/100`,
+          toInsert[i].match_reason,
+        ]
+          .filter(Boolean)
+          .join(". "),
+        related_id: oppId,
+        related_table: "opportunities",
+      });
+    }
   }
 
   const sourceNames = ["SAM.gov", "Detroit Bonfire", "MITN"];

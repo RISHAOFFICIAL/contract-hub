@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
+import { getPlanAccess } from "@/lib/billing";
 import {
   AddButton,
   EmptyState,
@@ -102,9 +103,14 @@ function SearchCard({ search }: { search: SavedSearchRow }) {
   );
 }
 
-export default async function SavedSearchesPage() {
+export default async function SavedSearchesPage({
+  searchParams,
+}: {
+  searchParams: { pro?: string };
+}) {
   const businessId = await getBusinessId();
   const supabase = await createClient();
+  const access = await getPlanAccess();
 
   const { data } = businessId
     ? await supabase
@@ -119,14 +125,45 @@ export default async function SavedSearchesPage() {
     <div className="space-y-5">
       <PageHeader
         title="Saved searches"
-        action={<AddButton href="/app/saved-searches/new" label="New search" />}
+        action={
+          access.isPro ? (
+            <AddButton href="/app/saved-searches/new" label="New search" />
+          ) : (
+            <Link
+              href="/app/plan"
+              className="btn-glass btn-primary-glass shrink-0 px-5 py-2.5 text-sm"
+            >
+              Upgrade to Pro
+            </Link>
+          )
+        }
       />
+
+      {searchParams.pro === "required" && (
+        <p className="rounded-2xl bg-brass-pale px-4 py-3 text-sm text-ink">
+          Saved searches are a Pro feature. One-off keyword scans stay free
+          on the Opportunities page.{" "}
+          <Link href="/app/plan" className="font-semibold text-forest underline">
+            Upgrade to Pro
+          </Link>{" "}
+          to save searches that run every day.
+        </p>
+      )}
+
+      {!access.isPro && searches.length === 0 && (
+        <p className="rounded-2xl bg-ivory px-4 py-3 text-sm text-ink-soft">
+          Saved searches are a Pro feature. On Free, run one-off keyword
+          scans from the Opportunities page instead.
+        </p>
+      )}
       {searches.length === 0 ? (
         <EmptyState
           title="No saved searches yet"
           body="Save a keyword recipe and the Hub will scan SAM.gov for you on schedule. Each run lands new matches in your opportunities inbox."
-          ctaHref="/app/saved-searches/new"
-          ctaLabel="Create your first search"
+          ctaHref={access.isPro ? "/app/saved-searches/new" : "/app/plan"}
+          ctaLabel={
+            access.isPro ? "Create your first search" : "Upgrade to Pro"
+          }
         />
       ) : (
         <div className="space-y-4">

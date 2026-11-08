@@ -68,6 +68,59 @@ CREATE TRIGGER businesses_set_updated_at
   BEFORE UPDATE ON public.businesses
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+-- ============================================================
+-- Pro billing columns (added November 2026, paywall build)
+-- plan is 'free' or 'pro'. grandfathered marks businesses that
+-- signed up before the paid plans launched: they keep full access
+-- for free. Stripe ids and status are written only by the billing
+-- webhook, which uses the service role key.
+-- ============================================================
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS grandfathered boolean NOT NULL DEFAULT false;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS stripe_customer_id text;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS subscription_status text;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS current_period_end timestamptz;
+ALTER TABLE public.businesses ADD COLUMN IF NOT EXISTS trial_ends_at timestamptz;
+
+-- Grandfather every business created before the paywall go-live
+-- (planned November 11, 2026). Safe to re-run: the cutoff is fixed,
+-- so businesses created after go-live are never grandfathered here.
+-- If go-live moves, move this cutoff date with it.
+UPDATE public.businesses
+SET grandfathered = true
+WHERE grandfathered = false
+  AND created_at < '2026-11-11T00:00:00Z';
+
+-- Guard: billing columns can only change from the server (service
+-- role). A signed-in user calling Supabase directly cannot set their
+-- own plan to pro. The webhook calls with the service role key, where
+-- auth.uid() is null, so it is not blocked. The profile editor never
+-- touches these columns.
+CREATE OR REPLACE FUNCTION public.prevent_billing_column_change()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF auth.uid() IS NOT NULL AND (
+    OLD.plan IS DISTINCT FROM NEW.plan OR
+    OLD.grandfathered IS DISTINCT FROM NEW.grandfathered OR
+    OLD.stripe_customer_id IS DISTINCT FROM NEW.stripe_customer_id OR
+    OLD.stripe_subscription_id IS DISTINCT FROM NEW.stripe_subscription_id OR
+    OLD.subscription_status IS DISTINCT FROM NEW.subscription_status OR
+    OLD.current_period_end IS DISTINCT FROM NEW.current_period_end OR
+    OLD.trial_ends_at IS DISTINCT FROM NEW.trial_ends_at
+  ) THEN
+    RAISE EXCEPTION 'Billing fields are managed by Contract Hub, not by the account holder.';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS businesses_billing_guard ON public.businesses;
+CREATE TRIGGER businesses_billing_guard
+  BEFORE UPDATE ON public.businesses
+  FOR EACH ROW EXECUTE FUNCTION public.prevent_billing_column_change();
+
 -- Auto create a blank business row for every new auth user.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger

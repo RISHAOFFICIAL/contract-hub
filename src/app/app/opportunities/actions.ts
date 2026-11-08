@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
+import { getPlanAccess } from "@/lib/billing";
 import { runScanForSearch } from "@/lib/scan";
 
 async function requireBusinessId(): Promise<string> {
@@ -61,6 +62,13 @@ export async function scanWithKeywords(formData: FormData) {
 /** Move an opportunity into the pipeline as a contract at the watching stage. */
 export async function trackOpportunity(id: string) {
   const businessId = await requireBusinessId();
+
+  // Free tracks up to 3 contracts. Pro and early members are unlimited.
+  const access = await getPlanAccess();
+  if (!access.canTrackMore) {
+    redirect("/app/opportunities?limit=reached");
+  }
+
   const supabase = await createClient();
   const { data: opp } = await supabase
     .from("opportunities")

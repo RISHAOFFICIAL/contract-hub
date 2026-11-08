@@ -41,6 +41,11 @@ Copy `.env.example` to `.env.local` and fill in:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard, Project Settings, API Keys |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard, Project Settings, API Keys (server only, never commit) |
 | `CRON_SECRET` | Any long random string, also set in Vercel env vars |
+| `STRIPE_SECRET_KEY` | Stripe Dashboard, Developers, API keys (server only, never commit) |
+| `STRIPE_PRICE_ID_PRO_MONTHLY` | Stripe Dashboard, Products, Pro Monthly price id (`price_...`) |
+| `STRIPE_PRICE_ID_PRO_ANNUAL` | Stripe Dashboard, Products, Pro Annual price id (`price_...`) |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard, Developers, Webhooks, endpoint signing secret (`whsec_...`) |
+| `NEXT_PUBLIC_APP_URL` | Public app URL, used for Stripe Checkout return links |
 
 In Supabase Auth settings, set the Site URL to your Vercel URL and add it
 to Redirect URLs so magic links and signup confirmations return to
@@ -67,6 +72,63 @@ Environment Variables. The `vercel.json` cron runs
 `GET /api/cron/daily-scan` daily at 12:15 UTC (07:15 America/Detroit in
 standard time). Vercel sends the cron with an Authorization header only on
 paid plans; the route also accepts the shared `CRON_SECRET` bearer token.
+
+## Billing (Pro paywall)
+
+Free tracks up to 3 contracts. Pro is $24 a month or $240 a year, with a
+7-day free trial, and unlocks unlimited tracking, alerts on new matches,
+saved searches, and the document vault. Early members are grandfathered:
+businesses created before the paywall go-live (November 11, 2026) keep
+full access for free.
+
+### Owner setup (Stripe dashboard)
+
+1. Create two recurring prices in Stripe Dashboard, Products: Pro
+   Monthly ($24/month) and Pro Annual ($240/year). Paste the price ids
+   into `STRIPE_PRICE_ID_PRO_MONTHLY` and `STRIPE_PRICE_ID_PRO_ANNUAL`.
+2. Add a webhook endpoint for `https://contract-hub-mu.vercel.app/api/billing/webhook`
+   listening for `checkout.session.completed`,
+   `customer.subscription.created`, `customer.subscription.updated`, and
+   `customer.subscription.deleted`. Paste the signing secret into
+   `STRIPE_WEBHOOK_SECRET`.
+3. Enable the customer portal in Stripe Dashboard, Settings, Billing,
+   Customer portal, so Pro members can manage billing from the Plan page.
+4. Set `STRIPE_SECRET_KEY` (test key while testing, live key at go-live)
+   in Vercel, Project Settings, Environment Variables.
+5. Re-run `supabase/schema.sql` in the Supabase SQL editor. It adds the
+   billing columns, grandfathers pre-launch businesses, and adds a
+   trigger that stops account holders from changing their own plan.
+
+### How it works
+
+- `src/lib/billing.ts` reads the business plan and enforces the
+  3-contract Free cap. `src/lib/stripe.ts` holds the Stripe client.
+- `src/app/app/plan/actions.ts` starts Stripe Checkout (subscription
+  with a 7-day trial) and opens the customer portal.
+- `src/app/api/billing/webhook/route.ts` verifies the Stripe signature
+  and syncs subscription status into `businesses.plan`. Only the
+  webhook, using the service role key, can change billing columns.
+- Gating lives in the server actions: creating a contract and tracking
+  an opportunity check the cap, creating a saved search requires Pro,
+  and new-match alerts are only written for Pro and grandfathered
+  businesses.
+
+### Testing (no real charges)
+
+Use Stripe test mode: test secret key, test price ids, and the Stripe
+CLI (`stripe listen --forward-to localhost:3000/api/billing/webhook`)
+to forward webhook events locally. Test card `4242 4242 4242 4242`,
+any future expiry, any CVC. A test checkout creates a trialing
+subscription; the webhook flips the business to Pro; cancel in the
+portal to watch it flip back to Free.
+
+### Still stubbed
+
+- Document vault file uploads: the vault is still a checklist. Uploads
+  need a Supabase Storage bucket, upload UI, and storage policies.
+  The Plan and Vault pages say so plainly.
+- Email alerts: new-match alerts are in-app rows only. Email delivery
+  needs a mail provider (for example Resend) and a sending worker.
 
 ## Architecture
 
@@ -133,11 +195,11 @@ Foundation is done. These ship in later phases:
 - Ads section (browse plus advertiser packages)
 - Team management screens
 - Capability statement generator
-- Billing and subscriptions (deferred). Contract Hub is free for now and
-  every business defaults to full access on the `free` plan. The `plan`
-  column exists on `businesses` for the future Pro tier, and a Stripe
-  product for Contract Hub Pro already exists, but nothing is wired to
-  Stripe in v1. No checkout, no paywall.
+- Billing and subscriptions (Pro paywall, branch `feature/pro-paywall`).
+  Free tracks up to 3 contracts; Pro is $24/month or $240/year with a
+  7-day free trial, wired to Stripe Checkout and webhooks. Early members
+  are grandfathered. See "Billing (Pro paywall)" above.
+- Email and push notifications
 - Email and push notifications
 - Document vault with real file storage (currently checklist only)
 - Native iOS and Android packaging

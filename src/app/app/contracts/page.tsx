@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
+import { getPlanAccess, FREE_CONTRACT_LIMIT } from "@/lib/billing";
 import {
   AddButton,
   EmptyState,
@@ -12,10 +13,11 @@ import { STAGES, stageLabel, type ContractRow } from "./stages";
 export default async function ContractsPage({
   searchParams,
 }: {
-  searchParams: { stage?: string };
+  searchParams: { stage?: string; limit?: string };
 }) {
   const supabase = await createClient();
   const businessId = await getBusinessId();
+  const access = await getPlanAccess();
 
   const activeStage = searchParams.stage ?? "all";
   const stageFilter = STAGES.some((s) => s.value === activeStage)
@@ -49,13 +51,43 @@ export default async function ContractsPage({
   }
 
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const atCap = !access.isPro && total >= FREE_CONTRACT_LIMIT;
 
   return (
     <div className="space-y-5">
       <PageHeader
         title="Contracts"
-        action={<AddButton href="/app/contracts/new" label="+ New contract" />}
+        action={
+          atCap ? (
+            <Link
+              href="/app/plan"
+              className="btn-glass btn-primary-glass shrink-0 px-5 py-2.5 text-sm"
+            >
+              Upgrade to Pro
+            </Link>
+          ) : (
+            <AddButton href="/app/contracts/new" label="+ New contract" />
+          )
+        }
       />
+
+      {searchParams.limit === "reached" && (
+        <p className="rounded-2xl bg-brass-pale px-4 py-3 text-sm text-ink">
+          You have reached the Free limit of {FREE_CONTRACT_LIMIT} tracked
+          contracts.{" "}
+          <Link href="/app/plan" className="font-semibold text-forest underline">
+            Upgrade to Pro
+          </Link>{" "}
+          for unlimited tracking.
+        </p>
+      )}
+
+      {!access.isPro && !atCap && (
+        <p className="rounded-2xl bg-ivory px-4 py-3 text-sm text-ink-soft">
+          You are tracking {total} of {FREE_CONTRACT_LIMIT} contracts on
+          Free. Pro tracks unlimited contracts.
+        </p>
+      )}
 
       {/* Stage filter pills */}
       <div className="flex flex-wrap gap-2">
