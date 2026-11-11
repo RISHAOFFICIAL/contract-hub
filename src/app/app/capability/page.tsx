@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
+import { dedupeStrings } from "@/lib/dedupe";
 import { EmptyState, formatMoney } from "@/components/ui";
 import { PrintButton } from "./print-button";
 import { certStatusLabel } from "../certifications/labels";
@@ -85,7 +86,10 @@ export default async function CapabilityPage() {
     contract_value: number | null;
   }[];
 
-  const competencies = [...(b.product_lines ?? []), ...(b.service_lines ?? [])];
+  const competencies = dedupeStrings([
+    ...(b.product_lines ?? []),
+    ...(b.service_lines ?? []),
+  ]);
   const location = [b.city, b.state].filter(Boolean).join(", ");
   const contactBits = [b.email, b.phone, b.website].filter(Boolean);
 

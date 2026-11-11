@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
 import { analyzeSolicitation, type AnalysisResult } from "@/lib/analyzer";
+import { dedupeStrings } from "@/lib/dedupe";
 import {
   PROPOSAL_SECTION_TITLES,
   SEEDER_NOTE,
@@ -283,7 +284,7 @@ export async function buildDraftFromData(contractId: string) {
       cityState ? ` is based in ${cityState}` : ""
     }.`
   );
-  const offerings = [...productLines, ...serviceLines];
+  const offerings = dedupeStrings([...productLines, ...serviceLines]);
   if (offerings.length > 0) {
     lines.push(`We provide: ${offerings.join("; ")}.`);
   }

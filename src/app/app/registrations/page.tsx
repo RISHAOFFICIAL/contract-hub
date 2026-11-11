@@ -124,9 +124,14 @@ export default async function RegistrationsPage() {
     registrations = (data ?? []) as RegistrationRow[];
   }
 
-  // Needs attention: expired/inactive status, or expiry within 90 days / past due
+  // Needs attention: in progress, expired/inactive status, or expiry within 90 days / past due
   const needsAttention = registrations.filter((r) => {
-    if (r.status === "expired" || r.status === "inactive") return true;
+    if (
+      r.status === "in_progress" ||
+      r.status === "expired" ||
+      r.status === "inactive"
+    )
+      return true;
     const days = daysUntil(r.expiry_date);
     return days !== null && days <= 90;
   });
@@ -151,33 +156,42 @@ export default async function RegistrationsPage() {
         />
       ) : (
         <>
-          {needsAttention.length > 0 && (
-            <section className="space-y-3">
-              <h2 className="font-display text-lg font-semibold text-[#8c3b2e]">
-                Needs attention
-              </h2>
+          <section className="space-y-3">
+            <h2 className="font-display text-lg font-semibold text-[#8c3b2e]">
+              Needs Attention
+            </h2>
+            <p className="text-sm text-ink-soft">
+              In progress, expired, or expiring within 90 days.
+            </p>
+            {needsAttention.length > 0 ? (
               <div className="space-y-4">
                 {needsAttention.map((r) => (
                   <RegistrationCard key={r.id} registration={r} />
                 ))}
               </div>
-            </section>
-          )}
+            ) : (
+              <p className="text-sm text-ink-faint">
+                No registrations need attention right now.
+              </p>
+            )}
+          </section>
 
-          {rest.length > 0 && (
-            <section className="space-y-3">
-              {needsAttention.length > 0 && (
-                <h2 className="font-display text-lg font-semibold text-forest">
-                  All clear
-                </h2>
-              )}
+          <section className="space-y-3">
+            <h2 className="font-display text-lg font-semibold text-forest">
+              All Registrations
+            </h2>
+            {rest.length > 0 ? (
               <div className="space-y-4">
                 {rest.map((r) => (
                   <RegistrationCard key={r.id} registration={r} />
                 ))}
               </div>
-            </section>
-          )}
+            ) : (
+              <p className="text-sm text-ink-faint">
+                All registrations are listed under Needs Attention above.
+              </p>
+            )}
+          </section>
         </>
       )}
     </div>

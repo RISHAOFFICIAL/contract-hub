@@ -8,6 +8,7 @@ import {
   PageHeader,
   TextInput,
   formatDate,
+  formatDateTime,
 } from "@/components/ui";
 import { SubmitButton } from "@/components/ui-client";
 import {
@@ -162,11 +163,7 @@ function ScanSummary({ row }: { row: {
         Last scan
       </h2>
       <p className="text-xs text-ink-faint">
-        {formatDate(row.run_at)}{" "}
-        {new Date(row.run_at).toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-        })}
+        {formatDateTime(row.run_at)}
       </p>
       <div className="mt-3 flex flex-wrap gap-2 text-sm">
         <span className="pill pill-muted">Found {row.found_count}</span>

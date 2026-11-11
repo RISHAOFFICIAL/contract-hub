@@ -73,8 +73,22 @@ type Quote = {
   shipping: number | null;
   total_landed: number | null;
   notes: string | null;
-  suppliers: { name: string }[] | null;
+  suppliers: { name: string } | { name: string }[] | null;
 };
+
+/**
+ * Resolves the name of an embedded to-one supplier relation. PostgREST
+ * returns a to-one embed as a single object, but the untyped query
+ * inference describes it as an array, so accept either shape. Falls back
+ * to "Unnamed supplier" only when no supplier is attached.
+ */
+function supplierDisplayName(
+  rel: { name: string } | { name: string }[] | null | undefined
+): string {
+  if (!rel) return "Unnamed supplier";
+  if (Array.isArray(rel)) return rel[0]?.name ?? "Unnamed supplier";
+  return rel.name ?? "Unnamed supplier";
+}
 
 type Supplier = { id: string; name: string };
 
@@ -266,7 +280,7 @@ export default async function WorkbenchPage({
 
   const quoteOptions: QuoteOption[] = quotes.map((q) => ({
     id: q.id,
-    supplierName: q.suppliers?.[0]?.name ?? "Unnamed supplier",
+    supplierName: supplierDisplayName(q.suppliers),
     totalLanded: Number(q.total_landed ?? 0),
   }));
 
@@ -531,7 +545,7 @@ export default async function WorkbenchPage({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-ink">
-                      {q.suppliers?.[0]?.name ?? "Unnamed supplier"}
+                      {supplierDisplayName(q.suppliers)}
                     </p>
                     <p className="mt-1 text-sm text-ink-soft">
                       {formatMoney(q.unit_price)} x{" "}

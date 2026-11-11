@@ -23,6 +23,30 @@ export function formatDate(
   });
 }
 
+/**
+ * Formats an ISO timestamp as a single string with the date and time
+ * separated by a space, e.g. "Nov 11, 2026 2:55 PM". Keep date and time
+ * in one string so the space between them can never be lost at a call
+ * site that renders the two parts separately.
+ */
+export function formatDateTime(
+  dateStr: string | null | undefined
+): string | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return null;
+  const date = d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `${date} ${time}`;
+}
+
 export function formatMoney(
   value: string | number | null | undefined
 ): string | null {

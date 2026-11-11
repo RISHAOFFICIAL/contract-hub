@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessId } from "@/lib/business";
-import { EmptyState, PageHeader, formatDate } from "@/components/ui";
+import { EmptyState, PageHeader, formatDateTime } from "@/components/ui";
 import { markAlertRead, markAllAlertsRead } from "./actions";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -60,11 +60,7 @@ function AlertCard({ alert }: { alert: AlertRow }) {
             {alert.title}
           </h3>
           <p className="mt-0.5 text-xs text-ink-faint">
-            {formatDate(alert.created_at)}{" "}
-            {new Date(alert.created_at).toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "2-digit",
-            })}
+            {formatDateTime(alert.created_at)}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">

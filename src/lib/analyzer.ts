@@ -29,7 +29,7 @@ const MONTHS =
   "January|February|March|April|May|June|July|August|September|October|November|December";
 
 const DATE_RE = new RegExp(
-  `\\b(?:(?:${MONTHS})\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}|\\d{1,2}[\\/-]\\d{1,2}[\\/-]\\d{2,4}|\\d{4}-\\d{2}-\\d{2})\\b`,
+  `\\b(?:(?:${MONTHS})\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}|\\d{1,2}(?:st|nd|rd|th)?\\s+(?:${MONTHS})\\s*,?\\s*\\d{4}|\\d{1,2}[\\/-]\\d{1,2}[\\/-]\\d{2,4}|\\d{4}-\\d{2}-\\d{2})(?:\\s+(?:at\\s+)?\\d{1,2}:\\d{2}\\s*(?:[AP]M)?(?:\\s+(?:EST|EDT|CST|CDT|MST|MDT|PST|PDT|UTC|GMT))?)?\\b`,
   "i"
 );
 
@@ -155,7 +155,7 @@ export function analyzeSolicitation(text: string): AnalysisResult {
   return {
     responseDeadline: findDateAfter(
       t,
-      /responses?\s+due|proposals?\s+due|bids?\s+due|offers?\s+due|closing\s+date|submission\s+deadline|response\s+deadline|due\s+date/i
+      /(?:responses?|proposals?|bids?|offers?)(?:\s+are)?\s+due|closing\s+date|submission\s+deadline|response\s+deadline|due\s+date/i
     ),
     questionsDeadline: findDateAfter(
       t,
