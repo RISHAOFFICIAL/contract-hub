@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { LESSONS } from "@/lib/foundations";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 
@@ -125,7 +126,7 @@ export async function getGuideContext(
     scansRun: scanRes.count ?? 0,
     savedSearches: searchRes.count ?? 0,
     lessonsCompleted: progressRes.count ?? 0,
-    totalLessons: 9,
+    totalLessons: LESSONS.length,
   };
 }
 
@@ -402,24 +403,71 @@ export function answerQuestion(
     };
   }
 
+  // Best bank for a business account
+  if (
+    has(
+      "best bank",
+      "which bank",
+      "business bank account",
+      "open a bank account",
+      "bank for my business",
+      "choose a bank"
+    )
+  ) {
+    return {
+      title: "Best banks for a business bank account",
+      body: [
+        "There is no single best bank; the right one fits how your business actually operates. Compare monthly fees and how to waive them, the minimum opening deposit and balance, monthly transaction limits, cash deposit options, online and mobile tools, branch access, and whether the bank offers business credit products you can grow into. Check each bank's current fee schedule; fees change and no lesson here lists amounts.",
+        "Three common starting options: a national bank with branches, which suits a business that wants in-person help in many places; a local credit union or community bank, which suits a business that wants lower fees and a local relationship; and an online business bank, which suits a business that works mostly online and wants low fees and strong mobile tools.",
+        "Open the account in your legal business name with your EIN, after your EIN and DUNS number are in place. This is general information only, not financial advice.",
+        DISCLAIMER,
+      ],
+      links: [
+        { label: "SBA: launch your business", href: "https://www.sba.gov/business-guide/launch-your-business" },
+      ],
+      action: { label: "Open Business Foundations", href: "/app/guide#foundations" },
+    };
+  }
+
+  // Net 30 accounts
+  if (has("net 30", "net-30", "net30")) {
+    return {
+      title: "Net 30 accounts",
+      body: [
+        "A net-30 account lets you buy now and pay the invoice in full within 30 days. It builds business credit only when the vendor reports your payments to Dun and Bradstreet, Experian Business, or Equifax Business, so confirm reporting before you open the account.",
+        "Vendors that commonly offer net-30 terms to new businesses include office supply vendors, janitorial and packaging suppliers, and fuel and auto parts vendors. To apply, have your EIN, DUNS number, business bank account, and one consistent business name, address, and phone number ready.",
+        "Start with 2 to 3 accounts, pay every invoice on time or early and never late, keep balances low, and pay in full. Net 30 is step 4 of the credit path: EIN, then DUNS number, then business bank account, then net-30 accounts, then larger vendor and fleet accounts, then bank lines.",
+        DISCLAIMER,
+      ],
+      links: [
+        {
+          label: "Get a free DUNS number",
+          href: "https://www.dnb.com/duns-number/get-a-duns.html",
+        },
+        { label: "SBA funding programs", href: "https://www.sba.gov/funding-programs" },
+      ],
+      action: { label: "Open Business Foundations", href: "/app/guide#foundations" },
+    };
+  }
+
   // Business credit / DUNS
   if (
     has(
       "business credit",
       "build credit",
+      "start business credit",
+      "how to start credit",
       "duns",
       "trade line",
-      "net 30",
-      "net-30",
       "credit tier"
     )
   ) {
     return {
       title: "Building business credit",
       body: [
-        "Start at Tier 0: form your entity, keep your business name, address, and phone consistent everywhere, open a business bank account, and get a free DUNS number from Dun and Bradstreet. This foundation is what lenders and vendors verify first.",
-        "Tier 1 is starter net-30 trade lines with vendors who report payments. Tier 2 is larger vendor accounts with higher limits. Tier 3 covers fleet cards and equipment financing. Tier 4 is bank lines of credit and SBA loans.",
-        "The tier ladder is an educator planning framework, not an official rating system, and approval for any account is never guaranteed. Scam warnings: never pay for an EIN, UEI, DUNS number, or SAM renewal, and never use a CPN (credit privacy number).",
+        "Business credit builds in steps, in this order. Step 1: get your EIN from the IRS. Step 2: get a free DUNS number from Dun and Bradstreet. Step 3: open a business bank account in your legal business name. Step 4: open 2 to 3 net-30 accounts with vendors that report payments, and pay every invoice on time or early. Step 5: larger vendor accounts with higher limits, then fleet cards and equipment financing. Step 6: bank lines of credit and SBA loans.",
+        "Each step rests on the one before it. Vendors and lenders check that your business name, address, and phone are consistent everywhere, and that your earlier accounts were paid on time.",
+        "The tier ladder (Tier 0 through Tier 4) is an educator planning framework, not an official rating system, and approval for any account is never guaranteed. Scam warnings: never pay for an EIN, UEI, DUNS number, or SAM renewal, and never use a CPN (credit privacy number).",
         DISCLAIMER,
       ],
       links: [
@@ -548,7 +596,7 @@ export function answerQuestion(
   return {
     title: "What the Guide covers",
     body: [
-      "I can help with your weekly priorities, SAM.gov registration and renewal, getting an EIN or UEI, building business credit, certifications that fit your business, pricing and margins, advertising in the Hub, and updating contracts with Talk to update.",
+      "I can help with your weekly priorities, SAM.gov registration and renewal, getting an EIN or UEI, building business credit, choosing a business bank account, net-30 accounts, certifications that fit your business, pricing and margins, advertising in the Hub, and updating contracts with Talk to update.",
       "Try one of the suggested questions below, or ask in your own words and I will point you to the right section.",
     ],
   };

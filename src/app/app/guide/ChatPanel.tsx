@@ -11,6 +11,8 @@ const SUGGESTED = [
   "Which certifications fit my business?",
   "How do I get an EIN?",
   "How do I build business credit?",
+  "What is a net 30 account?",
+  "What bank should I use for my business?",
   "How do I advertise my business?",
   "What are the contract basics?",
   "How do I sign in?",

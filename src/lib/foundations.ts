@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 type Db = Awaited<ReturnType<typeof createClient>>;
 
 /* ============================================================
-   Business Foundations: 9 guided lessons, official sources only
+   Business Foundations: 11 guided lessons, official sources only
    ============================================================ */
 
 export interface LessonLink {
@@ -79,6 +79,29 @@ export const LESSONS: Lesson[] = [
     checkKey: "Entity formed, EIN in hand, business bank account open.",
   },
   {
+    key: "best_banks",
+    title: "Best banks for a business bank account",
+    summary:
+      "The best bank for your business is the one whose fees, limits, and tools fit how you actually operate. Compare a few options before you open the account, because switching later costs time.",
+    steps: [
+      "Compare monthly fees first, and how to waive them, such as a minimum balance or direct deposits. Check the bank's current fee schedule; fees change and this lesson does not list amounts.",
+      "Check the minimum opening deposit and any minimum balance you must keep.",
+      "Check transaction limits: how many free deposits, withdrawals, and transfers you get each month, and what extra ones cost.",
+      "Check cash deposits: whether the bank takes cash, where, and what it costs, if your business handles cash.",
+      "Check online and mobile tools: bill pay, mobile deposit, invoicing, and connections to your bookkeeping.",
+      "Check branch access: whether you need a branch nearby, or whether online-only works for you.",
+      "Ask whether the bank offers business credit products you can grow into, such as a business credit card or a line of credit.",
+      "A national bank with branches suits a business that wants in-person help in many places.",
+      "A local credit union or community bank suits a business that wants lower fees and a local relationship.",
+      "An online business bank suits a business that works mostly online and wants low fees and strong mobile tools.",
+      "Pick the account that fits your actual volume, then open it in your legal business name with your EIN. This is general information only, not financial advice.",
+    ],
+    links: [
+      { label: "SBA: launch your business", href: "https://www.sba.gov/business-guide/launch-your-business" },
+    ],
+    checkKey: "You compared at least two banks and opened a business account that fits your volume.",
+  },
+  {
     key: "tier1",
     title: "Tier 1: starter trade lines",
     summary:
@@ -89,11 +112,37 @@ export const LESSONS: Lesson[] = [
       "Keep utilization low and pay every invoice on time or early.",
       "Confirm each vendor actually reports; unreported accounts do not build your file.",
       "Track open trade lines and due dates in Contract Hub.",
+      "New to net-30 terms? Read the Net 30 accounts lesson first; it explains how vendor reporting builds your file.",
     ],
     links: [
       { label: "SBA funding programs", href: "https://www.sba.gov/funding-programs" },
     ],
     checkKey: "At least 3 reporting trade lines with on-time payments.",
+  },
+  {
+    key: "net30",
+    title: "Net 30 accounts",
+    summary:
+      "A net-30 account lets you buy now and pay the invoice in full within 30 days. When the vendor reports your payments to a business credit bureau, on-time payments build your business credit file.",
+    steps: [
+      "Net 30 means the vendor ships your order now and you pay the full invoice within 30 days of the invoice date. It is short-term trade credit, not a loan.",
+      "It builds business credit only when the vendor reports payments to Dun and Bradstreet, Experian Business, or Equifax Business. Always confirm reporting before you open the account; unreported accounts do not build your file.",
+      "Vendors that commonly offer net-30 terms to new businesses include office supply vendors, janitorial and packaging suppliers, and fuel and auto parts vendors.",
+      "To apply, have your EIN, DUNS number, business bank account, and one consistent business name, address, and phone number ready. The vendor checks that your business looks real and consistent.",
+      "Start with 2 to 3 accounts, not ten. A few clean accounts beat a long list of unused ones.",
+      "Pay every invoice on time or early, and never late. One late payment can undo months of good history.",
+      "Keep balances low and pay in full; do not carry a balance past the due date.",
+      "Track each invoice due date in Contract Hub so nothing slips.",
+      "Net 30 is step 4 of the credit path: EIN, then DUNS number, then business bank account, then net-30 accounts, then larger vendor and fleet accounts, then bank lines.",
+    ],
+    links: [
+      {
+        label: "Get a free DUNS number",
+        href: "https://www.dnb.com/duns-number/get-a-duns.html",
+      },
+      { label: "SBA funding programs", href: "https://www.sba.gov/funding-programs" },
+    ],
+    checkKey: "At least 2 reporting net-30 accounts with on-time payments.",
   },
   {
     key: "tier2",
@@ -155,6 +204,7 @@ export const LESSONS: Lesson[] = [
       "Request your free DUNS number at dnb.com (never pay for one).",
       "Verify your DUNS profile details match your legal name and address exactly.",
       "Open a business checking account in the legal business name.",
+      "Compare banks before you open the account; see the Best banks for a business bank account lesson.",
       "Route all business income and expenses through that account only.",
       "Add the account details you need for SAM.gov payment setup.",
     ],

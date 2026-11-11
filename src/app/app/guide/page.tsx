@@ -70,6 +70,11 @@ export default async function GuidePage() {
       done: !!progress["duns_bank"],
     },
     {
+      label: "Open your first net-30 accounts",
+      href: "/app/guide#foundations",
+      done: !!progress["net30"],
+    },
+    {
       label: "Track your registrations",
       href: "/app/registrations",
       done: ctx.registrations.length > 0,
