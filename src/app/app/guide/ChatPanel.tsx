@@ -22,6 +22,12 @@ const SUGGESTED = [
   "How do I get paid for a contract?",
   "What NAICS codes do I need?",
   "How much does it cost to start?",
+  "How do I obtain capital?",
+  "How do I pay others while waiting on government payment?",
+  "Do I need a bond?",
+  "What insurance do I need?",
+  "Can I win with no past performance?",
+  "How do I spot a contract scam?",
 ];
 
 function AnswerCard({ answer }: { answer: GuideAnswer }) {

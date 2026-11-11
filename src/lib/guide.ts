@@ -491,6 +491,312 @@ export function answerQuestion(
     };
   }
 
+  // How to obtain capital
+  if (
+    has(
+      "capital",
+      "fund my",
+      "funding",
+      "obtain funding",
+      "get funding",
+      "raise capital",
+      "startup funding",
+      "microloan",
+      "micro loan",
+      "cdfi",
+      "7(a)",
+      "7a loan",
+      "grant",
+      "grants"
+    )
+  ) {
+    return {
+      title: "How to obtain capital",
+      body: [
+        "Start with the SBA: a 7(a) loan from an SBA-approved lender can cover working capital, equipment, and starting costs, with a program maximum of $5 million, and SBA microloans go up to $50,000 through nonprofit intermediary lenders for smaller needs. A business line of credit from your bank works the same way for short gaps: draw only what you need and pay it back as invoices land.",
+        "Community Development Financial Institutions (CDFIs) are mission-driven lenders that often work with new and underserved businesses a bank may turn down. Your local Small Business Development Center can point you to lenders in your area. Business credit cards can bridge a small gap, but pay the balance fast because the rates are high.",
+        "Grants for starting a business are rare, and real grants never charge an application fee. Anyone who promises guaranteed funding for a fee is selling you something, not funding you. Merchant cash advances are the most expensive option of all: fast cash against future sales at a very high cost, so treat them as a last resort.",
+        DISCLAIMER,
+      ],
+      links: [
+        { label: "SBA funding programs", href: "https://www.sba.gov/funding-programs" },
+      ],
+      action: { label: "Open Business Foundations", href: "/app/guide#foundations" },
+    };
+  }
+
+  // Paying others while waiting on government payment
+  if (
+    has(
+      "cash flow",
+      "cashflow",
+      "pay my subcontractors",
+      "pay subcontractors",
+      "pay my suppliers",
+      "pay suppliers",
+      "pay others",
+      "pay subs",
+      "pay my team",
+      "while waiting",
+      "waiting on payment",
+      "waiting for payment",
+      "before the government pays",
+      "government pays me",
+      "factoring",
+      "invoice factoring",
+      "assignment of claims",
+      "pay my workers",
+      "pay people",
+      "cover payroll",
+      "payroll",
+      "float the"
+    )
+  ) {
+    return {
+      title: "Paying others while waiting on government payment",
+      body: [
+        "Plan this before you bid, not after you win. Under the Prompt Payment Act, a federal buyer generally pays a proper invoice within 30 days after it receives the invoice or accepts the work, whichever is later, and small businesses have a 15-day payment goal. State and local buyers set their own timelines, so read the award. That means weeks pass between doing the work and seeing the money.",
+        "The tools for the gap: a business line of credit you open before you need it; invoice factoring, where a financing company advances you most of an accepted invoice and collects from the buyer; and assignment of claims, which lets a federal prime contractor assign the right to be paid under a contract to a bank or financing institution so the lender can collect directly from the government. Start the assignment paperwork early because it takes time to set up. Supplier net terms help too: buy on net-30 terms and pay the supplier after the buyer pays you.",
+        "Never promise a subcontractor or supplier a payment date you cannot cover. Put payment timing in writing in every subcontract, read any pay-when-paid clause before you sign, and schedule sub payments against your milestones so money goes out only after work is accepted. If the cash is not lined up, do not take the award.",
+        DISCLAIMER,
+      ],
+      links: [
+        { label: "SBA funding programs", href: "https://www.sba.gov/funding-programs" },
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // Bonds: bid, performance, and payment
+  if (
+    has(
+      "bond",
+      "bonds",
+      "bid bond",
+      "performance bond",
+      "payment bond",
+      "surety",
+      "bonding"
+    )
+  ) {
+    return {
+      title: "Bonds: bid, performance, and payment",
+      body: [
+        "A bid bond guarantees that if you win the bid, you will sign the contract and furnish the bonds the award requires. On federal work the bid guarantee is generally at least 20 percent of the bid price, capped at $3 million. A performance bond guarantees you will finish the work as the contract requires. A payment bond guarantees your subcontractors, laborers, and suppliers get paid.",
+        "Under the Miller Act, federal construction contracts over $150,000 require both a performance bond and a payment bond, each generally equal to 100 percent of the contract price. Contracts between $35,000 and $150,000 require other payment protections the contracting officer selects. Most states have their own version of the Miller Act for state-funded construction, with different thresholds, so check the solicitation.",
+        "Bonds are not insurance: a surety underwrites them on your financials, credit, and experience, and you pay a premium for the bond. Talk to a surety agent early, before you bid, because bonding capacity takes time to build and a bid you cannot bond is a bid you cannot win.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // Insurance
+  if (
+    has(
+      "insurance",
+      "general liability",
+      "workers comp",
+      "workers compensation",
+      "workmans comp",
+      "commercial auto",
+      "professional liability",
+      "certificate of insurance",
+      "liability insurance",
+      "do i need insurance"
+    )
+  ) {
+    return {
+      title: "What insurance do I need?",
+      body: [
+        "Most solicitations name the insurance they require, and the amounts vary by contract, so the solicitation controls. The coverages buyers ask for most often are general liability, which covers third-party injury and property damage; workers compensation, which covers your employees if they are hurt on the job; commercial auto, which covers vehicles used for the work; and professional liability, which covers errors in professional services.",
+        "Start with a general liability policy and add the rest as solicitations require. Keep your certificates of insurance current, because the Workbench compliance matrix asks for the certificate on every bid and an expired certificate can sink a proposal.",
+        "Insurance is not a bond: insurance protects you against losses, while a bond guarantees the buyer you will perform. Talk to a commercial insurance agent who works with government contractors; they know what solicitations usually ask for.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // How long until the first win
+  if (
+    has(
+      "how long until",
+      "how long does it take",
+      "how long before",
+      "how soon",
+      "when will i win",
+      "first win",
+      "how long to win",
+      "how many bids"
+    )
+  ) {
+    return {
+      title: "How long until I win my first contract?",
+      body: [
+        "There is no guaranteed timeline, and anyone who promises you a win by a date is selling something. Months of steady bidding before a first win is normal: you are learning the process, building registrations and certifications, and getting your pricing right while buyers get to know you.",
+        "Micro-purchases and small local buys are the fastest path to a first win because they are simpler and have less competition. Larger federal work takes longer and usually comes after you have past performance to show.",
+        "The pattern that works is volume with discipline: bid only on work you can actually deliver, track every bid in Contract Hub, and keep bidding while you build. Each bid teaches you something, even the ones you lose.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open opportunities", href: "/app/opportunities" },
+    };
+  }
+
+  // Winning with no past performance
+  if (
+    has(
+      "past performance",
+      "no past performance",
+      "no experience",
+      "no track record",
+      "just started",
+      "never won",
+      "first contract",
+      "win my first",
+      "build past performance",
+      "no history"
+    )
+  ) {
+    return {
+      title: "Winning with no past performance",
+      body: [
+        "Yes, you can win without past performance, but you have to build it first. The most common path is to subcontract: do work for a prime contractor, deliver well, and ask the prime to confirm the work in writing so it becomes past performance you can cite.",
+        "Teaming with an experienced business on a bid also works: the team brings the past performance while you bring the product or the labor. Smaller buys help too: micro-purchases and small state and local contracts have less competition and simpler requirements, and each completed job adds a line to your capability statement.",
+        "Document everything from day one: the contract, delivery proof, invoices, and a short note from the buyer or prime about the quality of the work. Past performance is what buyers weigh most, and clean records are how a new business earns it.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open your capability statement", href: "/app/capability" },
+    };
+  }
+
+  // Prime contractor vs subcontractor
+  if (
+    has(
+      "prime contractor",
+      "prime vs",
+      "what is a prime",
+      "be a subcontractor",
+      "become a subcontractor",
+      "work as a subcontractor",
+      "subcontractor",
+      "subcontracting",
+      "prime and sub",
+      "prime or sub"
+    )
+  ) {
+    return {
+      title: "Prime contractor vs subcontractor",
+      body: [
+        "The prime contractor holds the contract with the government buyer and is responsible to the buyer for all of the work, including the work a subcontractor performs. The subcontractor works for the prime, not for the buyer, under a subcontract the prime issues.",
+        "Starting as a subcontractor is the usual way in: you learn the process, build past performance, and earn income without carrying the full prime risk. As a prime, you control the bid and the margin, but you also carry the compliance, bonding, and delivery risk.",
+        "On set-aside contracts the prime generally must self-perform about 50 percent of the work (FAR 52.219-14), so a prime cannot subcontract away the whole job. The Workbench guardrails card checks your self-performed percentage on every bid.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // Spotting scams
+  if (
+    has(
+      "scam",
+      "scams",
+      "fraud",
+      "guaranteed contract",
+      "guaranteed contracts",
+      "pay to bid",
+      "paid bid list",
+      "bid list",
+      "is this legit",
+      "is it a scam",
+      "legit",
+      "legitimate",
+      "too good to be true",
+      "upfront fee"
+    )
+  ) {
+    return {
+      title: "How to spot a government contract scam",
+      body: [
+        "The government never charges you to bid. SAM.gov registration, your UEI, your EIN, and your DUNS number are all free, and any site or caller charging for them is a middleman at best and a scam at worst.",
+        "Watch for these signs: a promise of a guaranteed contract, a paid list of secret bids, a fee to see an opportunity, pressure to pay fast, or payment asked by gift card or wire transfer. Real solicitations are published on SAM.gov or the buyer's official portal, and real buyers never ask you to pay to win.",
+        "Verify everything on the official site: find the solicitation on SAM.gov or the buyer portal yourself, and confirm any buyer contact through the agency's official directory before you send documents or money. If it feels rushed or secret, walk away.",
+        DISCLAIMER,
+      ],
+      links: [
+        { label: "Search open solicitations on SAM.gov", href: "https://sam.gov" },
+      ],
+      action: { label: "Open opportunities", href: "/app/opportunities" },
+    };
+  }
+
+  // Solicitation types: RFQ vs RFP vs IFB
+  if (
+    has(
+      "what is an rfq",
+      "what is a rfq",
+      "what does rfq",
+      "rfq vs",
+      "rfq and",
+      "rfq or",
+      "request for quote",
+      "request for quotation",
+      "what is an ifb",
+      "what is a ifb",
+      "what does ifb",
+      "invitation for bid",
+      "invitation to bid",
+      "sealed bid",
+      "what is an rfi",
+      "what is a rfi",
+      "sources sought",
+      "solicitation type",
+      "types of solicitation",
+      "difference between an rfq",
+      "difference between rfq",
+      "rfp vs",
+      "what is an rfp",
+      "what does rfp",
+      "rfp and an rfq",
+      "rfp or rfq"
+    )
+  ) {
+    return {
+      title: "RFQ vs RFP vs IFB",
+      body: [
+        "An RFQ, a request for quotation, is how buyers usually buy simpler goods: you quote a price for a defined item, and the award often goes to the lowest priced quote that meets the requirements.",
+        "An RFP, a request for proposal, is for more complex work: you submit a full proposal showing how you will do the work, and the buyer awards on best value, weighing technical merit and price together. An IFB, an invitation for bids, is a sealed bid: you bid a price, the bids are opened publicly, and the award usually goes to the lowest responsive bidder.",
+        "An RFI or sources sought notice is market research, not a bid: the buyer is asking who can do the work, and no award follows it. Respond to those when you can, because they shape the real solicitation that comes later.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // Business license
+  if (
+    has(
+      "business license",
+      "license",
+      "licensed",
+      "permit",
+      "permits",
+      "do i need a license"
+    )
+  ) {
+    return {
+      title: "Do I need a business license?",
+      body: [
+        "It depends on your city, state, and industry. Most cities require a general business license or registration to operate, and some trades, like electrical, plumbing, or construction work, need a professional license on top of that. Check Detroit and Michigan licensing rules for your line of work before you bid.",
+        "SAM.gov registration is not a business license: it makes you visible to federal buyers, but it does not authorize you to operate a business. Some solicitations also require a specific license for the work, and the solicitation will say so.",
+        "If the solicitation requires a license you do not have, do not bid until you have it or have teamed with someone who does. A bid without a required license is a bid that cannot be awarded.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open registrations", href: "/app/registrations" },
+    };
+  }
+
   // Advertise / ad packages
   if (has("advertise", "ads", "ad package", "promote my business")) {
     return {
@@ -639,6 +945,8 @@ export function answerQuestion(
       "respond to a solicitation",
       "solicitation",
       "rfp",
+      "rfq",
+      "ifb",
       "request for proposal"
     )
   ) {
@@ -850,7 +1158,7 @@ export function answerQuestion(
   return {
     title: "What the Guide covers",
     body: [
-      "I can help with your weekly priorities, SAM.gov registration and renewal, getting an EIN or UEI, building business credit, choosing a business bank account, net-30 accounts and suppliers, certifications that fit your business, pricing and margins, finding contracts to bid on, writing a proposal, your capability statement, getting paid, NAICS codes, starting costs, the nonmanufacturer rule and subcontracting limits, what happens after you win, inviting your team, whether you need a website, advertising in the Hub, and updating contracts with Talk to update.",
+      "I can help with your weekly priorities, SAM.gov registration and renewal, getting an EIN or UEI, building business credit, choosing a business bank account, net-30 accounts and suppliers, certifications that fit your business, pricing and margins, finding contracts to bid on, writing a proposal, your capability statement, getting paid, NAICS codes, starting costs, the nonmanufacturer rule and subcontracting limits, what happens after you win, inviting your team, whether you need a website, obtaining capital, paying others while you wait on government payment, bonds and insurance, winning with no past performance, prime versus subcontractor, how long a first win takes, spotting scams, solicitation types, and business licenses, advertising in the Hub, and updating contracts with Talk to update.",
       "Try one of the suggested questions below, or ask in your own words and I will point you to the right section.",
     ],
   };
