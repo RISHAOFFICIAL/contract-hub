@@ -442,7 +442,7 @@ export function answerQuestion(
       title: "Net 30 accounts",
       body: [
         "A net-30 account lets you buy now and pay the invoice in full within 30 days. It builds business credit only when the vendor reports your payments to Dun and Bradstreet, Experian Business, or Equifax Business, so confirm reporting before you open the account.",
-        "Vendors that commonly offer net-30 terms to new businesses include office supply vendors, janitorial and packaging suppliers, and fuel and auto parts vendors. To apply, have your EIN, DUNS number, business bank account, and one consistent business name, address, and phone number ready.",
+        "Vendors that commonly offer net-30 terms to new businesses include office supply vendors, janitorial and packaging suppliers, and fuel and auto parts vendors. Four starter vendors that business credit guides commonly cite are Uline for shipping and packaging supplies, Quill for office and cleaning supplies, Grainger for industrial and safety supplies, and Crown Office Supplies for office supplies. Terms and reporting change, so confirm with the vendor that it reports to Dun and Bradstreet, Experian Business, or Equifax Business before you order, and know that approval is never guaranteed. To apply, have your EIN, DUNS number, business bank account, and one consistent business name, address, and phone number ready.",
         "Start with 2 to 3 accounts, pay every invoice on time or early and never late, keep balances low, and pay in full. Net 30 is step 4 of the credit path: EIN, then DUNS number, then business bank account, then net-30 accounts, then larger vendor and fleet accounts, then bank lines.",
         DISCLAIMER,
       ],
@@ -531,7 +531,7 @@ export function answerQuestion(
   }
 
   // Certifications
-  if (has("certification", "certifications", "wosb", "hubzone", "dbe", "mbe", "8(a)")) {
+  if (has("certification", "certifications", "wosb", "hubzone", "dbe", " mbe", "mbe certification", "8(a)")) {
     const tracked = ctx.certifications.map(
       (c) => `${c.name} (${c.status.replace("_", " ")})`
     );
@@ -576,6 +576,250 @@ export function answerQuestion(
     };
   }
 
+  // Finding suppliers
+  if (
+    has(
+      "find suppliers",
+      "find a supplier",
+      "find vendors",
+      "supplier",
+      "vendor",
+      "vendors",
+      "where to buy",
+      "source products",
+      "buy supplies"
+    )
+  ) {
+    return {
+      title: "Finding suppliers",
+      body: [
+        "Start with vendors you already buy from and ask whether they offer net-30 terms or a business account. For a new product line, search the supplier's own site or a wholesale directory, then check that they ship to your area and can meet the delivery date in the solicitation.",
+        "Track every vendor you contact in the Suppliers section, with notes on what they sell and how the outreach went. When a bid needs a price, collect quotes there and compare landed cost (product cost plus shipping, fees, and fulfillment) before you set your bid price.",
+        "Never pay a supplier directory or a middleman just to see a vendor list. Real suppliers will talk terms with a registered business that has an EIN and a DUNS number.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open suppliers", href: "/app/suppliers" },
+    };
+  }
+
+  // Finding contracts to bid on
+  if (
+    has(
+      "find contracts",
+      "find bids",
+      "find opportunities",
+      "open bids",
+      "open opportunities",
+      "where to find contracts",
+      "search for bids",
+      "search for contracts",
+      "look for contracts"
+    )
+  ) {
+    return {
+      title: "Finding contracts to bid on",
+      body: [
+        "Save a search with the keywords and location that match what you sell, and Contract Hub scans for you every day. Matches land in Opportunities and in your Alerts inbox. You can also run a one-time scan right now from the Opportunities page.",
+        "Scans cover SAM.gov for federal work, Detroit Bonfire for City of Detroit work, and MITN (BidNet) for Michigan local work. Michigan SIGMA needs a manual check, and the Opportunities page links to it. Every match is scored against your profile keywords and NAICS codes, and matches scoring 40 or higher are saved for you.",
+        "Start narrow: one or two keywords tied to a real product or service you can deliver. Track a bid you like and it enters the 8-stage lifecycle, from watching through closeout.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open opportunities", href: "/app/opportunities" },
+    };
+  }
+
+  // Writing a proposal
+  if (
+    has(
+      "proposal",
+      "write a proposal",
+      "submit a proposal",
+      "submit a bid",
+      "submit my bid",
+      "respond to a solicitation",
+      "solicitation",
+      "rfp",
+      "request for proposal"
+    )
+  ) {
+    return {
+      title: "Writing a proposal",
+      body: [
+        "Track the opportunity first, then open its Proposal Workbench. The solicitation analyzer pulls out the deadline, delivery requirements, and questions deadline from the solicitation text. Every extraction is labeled a draft suggestion, so verify it against the official solicitation before you rely on it.",
+        "Work through the compliance matrix, which seeds 8 starter items including the certificate of insurance, then build your proposal in the 6-section builder and save a version snapshot when it is ready. Collect supplier quotes with landed cost and check the margin calculator before you set your price.",
+        "Finish with the submission checklist, then submit through the buyer's own portal by the deadline. Contract Hub prepares the packet; it does not submit the bid for you.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // Capability statement
+  if (has("capability statement", "capability")) {
+    return {
+      title: "What is a capability statement?",
+      body: [
+        "A capability statement is a one-page summary buyers use to judge whether you can do the work: what you sell, your NAICS codes, your certifications, your past performance, and how to reach you. Buyers often ask for it before they invite you to bid.",
+        "Contract Hub builds one for you from your business profile. Fill in your profile, NAICS codes, certifications summary, and past performance, then open the Capability page to preview it and print it or save it as a PDF.",
+        "Keep it to one page and update it after every award, because past performance is what buyers weigh most.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open your capability statement", href: "/app/capability" },
+    };
+  }
+
+  // Getting paid
+  if (
+    has(
+      "get paid",
+      "paid for",
+      "invoice",
+      "invoicing",
+      "send an invoice",
+      "milestone",
+      "when do i get paid",
+      "receive payment"
+    )
+  ) {
+    return {
+      title: "Getting paid for a contract",
+      body: [
+        "On the contract detail page, add a milestone for each delivery step and mark it complete as you deliver. Add invoices there too; they are numbered automatically (INV-####) and move through draft, sent, paid, and overdue, with paid and outstanding totals shown.",
+        "Government buyers pay on the terms in the award, not on yours, so read the award documents for the payment schedule and how to invoice. Many federal buyers pay through the Invoice Processing Platform (IPP); your award will say where to send the invoice.",
+        "If an invoice goes overdue, follow up with the buyer's point of contact and keep a record of every message. Do not start new work for a buyer who has not paid for the last job without a written plan to catch up.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // NAICS codes
+  if (
+    has("naics", "industry code", "classification code", "what code do i need")
+  ) {
+    return {
+      title: "What NAICS codes do I need?",
+      body: [
+        "NAICS codes are the 2 to 6 digit numbers that describe what a business sells, and buyers use them to find vendors and set eligibility for set-aside work. Pick the codes for what you actually sell, not what you might sell one day.",
+        "Add them to your business profile, separated by commas, for example 561720 for janitorial services or 423850 for janitorial supply wholesaling. Scans score opportunities against your codes, so the right codes mean better matches.",
+        "Look codes up at naics.com or in the U.S. Census NAICS search. If you sell more than one thing, list a code for each line.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open your profile", href: "/app/profile" },
+    };
+  }
+
+  // Cost to start
+  if (
+    has(
+      "how much does it cost",
+      "cost to start",
+      "cost to get started",
+      "startup cost",
+      "start-up cost",
+      "how much money do i need"
+    )
+  ) {
+    return {
+      title: "How much does it cost to start?",
+      body: [
+        "The core registrations are free: an EIN from the IRS, a UEI and SAM.gov registration, and a DUNS number all cost nothing when you do them yourself at the official sites. Never pay a service for any of them.",
+        "Contract Hub is free for now, with a paid Pro tier coming later. State filing fees to form your business vary by state, and business bank account fees vary by bank, so check the current schedule before you file or open an account.",
+        "You do not need inventory to start as a broker: you quote the buyer's need, buy from your supplier only after you win, and get paid on the award terms. Your biggest early cost is time.",
+        DISCLAIMER,
+      ],
+      action: { label: "See the plan", href: "/app/plan" },
+    };
+  }
+
+  // Nonmanufacturer rule and subcontracting limits
+  if (
+    has(
+      "nonmanufacturer",
+      "non-manufacturer",
+      "non manufacturer",
+      "50% rule",
+      "50 percent",
+      "subcontracting limit",
+      "subcontract",
+      "self-perform",
+      "self perform"
+    )
+  ) {
+    return {
+      title: "The nonmanufacturer rule and subcontracting limits",
+      body: [
+        "If you supply products you do not make yourself, the nonmanufacturer rule applies to set-aside supply contracts: you generally must supply a product made by a small business manufacturer, unless the SBA has issued a waiver for that product class. The Workbench has a nonmanufacturer rule checklist to check against each solicitation.",
+        "Set-aside contracts also generally require the prime contractor to self-perform about 50 percent of the work (FAR 52.219-14). The Workbench guardrails card checks the self-performed percentage you enter and flags it when it falls below 50 percent.",
+        "Both rules are general information, not legal advice, and the exact clause in your solicitation controls. Verify each point against the solicitation before you submit.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // After winning a bid
+  if (
+    has(
+      "after i win",
+      "after winning",
+      "won a bid",
+      "win a bid",
+      "after award",
+      "after the award",
+      "i won",
+      "what happens after"
+    )
+  ) {
+    return {
+      title: "What happens after I win a bid?",
+      body: [
+        "Move the contract to awarded, then to in progress when work starts. Read the award documents first: they set the start date, the delivery schedule, and how to invoice.",
+        "Track delivery with milestones and payment with invoices on the contract detail page. When the work is done, mark it completed and close it out; completed contracts become the past performance on your capability statement.",
+        "Keep every record from the award: the solicitation, your proposal, the award, delivery proof, and invoices. Buyers check past performance on the next bid, and clean records are what win it.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open contracts", href: "/app/contracts" },
+    };
+  }
+
+  // Inviting a team
+  if (has("team member", "my team", "invite", "add a team", "team")) {
+    return {
+      title: "How do I invite my team?",
+      body: [
+        "Open the Team page and add each person by name, email, and role: Owner, Admin, Member, or Viewer. Owners have full control. Admins can manage nearly everything except the team itself. Members can edit work but not billing. Viewers can only read.",
+        "In this version, adding a member records them on your team; no email invitation is sent yet, so tell the person directly that they are added. Email invitations arrive in a later phase.",
+        "You can change a member's role or remove them at any time. The owner cannot be removed.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open team", href: "/app/team" },
+    };
+  }
+
+  // Do I need a website?
+  if (
+    has(
+      "website",
+      "web site",
+      "do i need a website",
+      "business website",
+      "build a website",
+      "need a site"
+    )
+  ) {
+    return {
+      title: "Do I need a website?",
+      body: [
+        "No, not to start bidding. Government buyers check your SAM registration and your capability statement first, and neither one needs a website.",
+        "Contract Hub does not have a website builder. When you are ready, a simple one-page site is enough: who you are, what you sell, your NAICS codes, and how to reach you. Free hosting options exist, and your capability statement can stand in for a site until then.",
+        "Do not spend money on a fancy website before your first bid. Win work first, then invest in the site.",
+        DISCLAIMER,
+      ],
+      action: { label: "Open your capability statement", href: "/app/capability" },
+    };
+  }
+
   // Signing in
   if (
     has(
@@ -606,7 +850,7 @@ export function answerQuestion(
   return {
     title: "What the Guide covers",
     body: [
-      "I can help with your weekly priorities, SAM.gov registration and renewal, getting an EIN or UEI, building business credit, choosing a business bank account, net-30 accounts, certifications that fit your business, pricing and margins, advertising in the Hub, and updating contracts with Talk to update.",
+      "I can help with your weekly priorities, SAM.gov registration and renewal, getting an EIN or UEI, building business credit, choosing a business bank account, net-30 accounts and suppliers, certifications that fit your business, pricing and margins, finding contracts to bid on, writing a proposal, your capability statement, getting paid, NAICS codes, starting costs, the nonmanufacturer rule and subcontracting limits, what happens after you win, inviting your team, whether you need a website, advertising in the Hub, and updating contracts with Talk to update.",
       "Try one of the suggested questions below, or ask in your own words and I will point you to the right section.",
     ],
   };

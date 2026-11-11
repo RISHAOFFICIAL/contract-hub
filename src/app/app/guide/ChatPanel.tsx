@@ -16,6 +16,12 @@ const SUGGESTED = [
   "How do I advertise my business?",
   "What are the contract basics?",
   "How do I sign in?",
+  "How do I find contracts to bid on?",
+  "How do I write a proposal?",
+  "What is a capability statement?",
+  "How do I get paid for a contract?",
+  "What NAICS codes do I need?",
+  "How much does it cost to start?",
 ];
 
 function AnswerCard({ answer }: { answer: GuideAnswer }) {
