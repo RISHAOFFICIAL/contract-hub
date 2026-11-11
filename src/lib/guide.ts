@@ -408,10 +408,17 @@ export function answerQuestion(
     has(
       "best bank",
       "which bank",
+      "what bank",
+      "what banks",
+      "bank should",
+      "bank do i",
+      "bank to use",
+      "business bank",
       "business bank account",
       "open a bank account",
       "bank for my business",
-      "choose a bank"
+      "choose a bank",
+      "checking account"
     )
   ) {
     return {
@@ -457,6 +464,9 @@ export function answerQuestion(
       "build credit",
       "start business credit",
       "how to start credit",
+      "line of credit",
+      "bank loan",
+      "sba loan",
       "duns",
       "trade line",
       "credit tier"
