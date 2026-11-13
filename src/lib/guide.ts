@@ -969,10 +969,17 @@ export function answerQuestion(
       body: [
         "A capability statement is a one-page summary buyers use to judge whether you can do the work: what you sell, your NAICS codes, your certifications, your past performance, and how to reach you. Buyers often ask for it before they invite you to bid.",
         "Contract Hub builds one for you from your business profile. Fill in your profile, NAICS codes, certifications summary, and past performance, then open the Capability page to preview it and print it or save it as a PDF.",
+        "If you would rather have one made for you, Lexis Sapphire Studio makes capability statements for $55. The button below takes you to pay for it.",
         "Keep it to one page and update it after every award, because past performance is what buyers weigh most.",
         DISCLAIMER,
       ],
-      action: { label: "Open your capability statement", href: "/app/capability" },
+      links: [
+        { label: "Or build one yourself free in the app", href: "/app/capability" },
+      ],
+      action: {
+        label: "Get your capability statement made, $55",
+        href: "https://buy.stripe.com/7sYdR87km9B52NugjpfrW0m",
+      },
     };
   }
 
@@ -1121,10 +1128,13 @@ export function answerQuestion(
       body: [
         "No, not to start bidding. Government buyers check your SAM registration and your capability statement first, and neither one needs a website.",
         "Contract Hub does not have a website builder. When you are ready, a simple one-page site is enough: who you are, what you sell, your NAICS codes, and how to reach you. Free hosting options exist, and your capability statement can stand in for a site until then.",
-        "Do not spend money on a fancy website before your first bid. Win work first, then invest in the site.",
+        "Do not spend money on a fancy website before your first bid. Win work first, then invest in the site. When you are ready, Lexis Sapphire Studio builds websites for small businesses through Contract Hub, starting at $575. A basic site is $575, and it costs more if you need something beyond a basic site. The button below takes you to pay for your website.",
         DISCLAIMER,
       ],
-      action: { label: "Open your capability statement", href: "/app/capability" },
+      action: {
+        label: "Get your website built, from $575",
+        href: "https://buy.stripe.com/8x214mfQSeVpgEk9V1frW0l",
+      },
     };
   }
 

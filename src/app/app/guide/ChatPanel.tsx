@@ -31,6 +31,7 @@ const SUGGESTED = [
 ];
 
 function AnswerCard({ answer }: { answer: GuideAnswer }) {
+  const actionIsExternal = answer.action?.href.startsWith("http") ?? false;
   return (
     <div className="glass rounded-2xl p-5">
       <h3 className="font-display text-lg font-semibold text-forest">
@@ -45,23 +46,28 @@ function AnswerCard({ answer }: { answer: GuideAnswer }) {
       </div>
       {answer.links && answer.links.length > 0 && (
         <ul className="mt-3 space-y-1">
-          {answer.links.map((l) => (
-            <li key={l.href}>
-              <a
-                href={l.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-semibold text-brass-dark underline underline-offset-2"
-              >
-                {l.label}
-              </a>
-            </li>
-          ))}
+          {answer.links.map((l) => {
+            const linkIsExternal = l.href.startsWith("http");
+            return (
+              <li key={l.href}>
+                <a
+                  href={l.href}
+                  target={linkIsExternal ? "_blank" : undefined}
+                  rel={linkIsExternal ? "noopener noreferrer" : undefined}
+                  className="text-sm font-semibold text-brass-dark underline underline-offset-2"
+                >
+                  {l.label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       )}
       {answer.action && (
         <a
           href={answer.action.href}
+          target={actionIsExternal ? "_blank" : undefined}
+          rel={actionIsExternal ? "noopener noreferrer" : undefined}
           className="btn-glass btn-primary-glass mt-4 inline-block px-5 py-2 text-sm"
         >
           {answer.action.label}
